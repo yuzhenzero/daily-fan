@@ -250,33 +250,20 @@ html = r'''<!DOCTYPE html>
 __EPISODES_JS__
 
 (function() {
-  var STORAGE_KEY = 'fanren_episodes';
-  var CHECK_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7 days
-  var CORS_PROXIES = [
-    'https://api.allorigins.win/raw?url=',
-    'https://corsproxy.io/?'
-  ];
-  var BILI_API = 'https://api.bilibili.com/pgc/view/web/season?season_id=28747';
-  var EMBEDDED_COUNT = EPISODES.length;
   var currentIdx = -1;
-  var episodePool = EPISODES;
-
-  var footerEl = document.getElementById('footer-status');
-  var rerollBtn = document.getElementById('reroll-btn');
-  var cardEl = document.getElementById('card');
 
   function getRandomIdx() {
-    if (episodePool.length === 0) return -1;
-    if (episodePool.length === 1) return 0;
+    if (EPISODES.length === 0) return -1;
+    if (EPISODES.length === 1) return 0;
     var idx;
     do {
-      idx = Math.floor(Math.random() * episodePool.length);
+      idx = Math.floor(Math.random() * EPISODES.length);
     } while (idx === currentIdx);
     return idx;
   }
 
   function displayEpisode(idx) {
-    var ep = episodePool[idx];
+    var ep = EPISODES[idx];
     if (!ep) return;
 
     var img = document.getElementById('episode-cover');
@@ -304,10 +291,12 @@ __EPISODES_JS__
   function onReroll() {
     var idx = getRandomIdx();
     if (idx < 0) return;
-    cardEl.classList.add('fade-out');
+
+    var card = document.getElementById('card');
+    card.classList.add('fade-out');
     setTimeout(function() {
       displayEpisode(idx);
-      cardEl.classList.remove('fade-out');
+      card.classList.remove('fade-out');
     }, 200);
   }
 
@@ -322,186 +311,17 @@ __EPISODES_JS__
     img.alt = '封面加载失败';
   };
 
-  // ---- Auto-update logic ----
-
-  function loadFromCache() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return null;
-      return JSON.parse(raw);
-    } catch (e) {
-      return null;
-    }
-  }
-
-  function saveToCache(episodes) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({
-        episodes: episodes,
-        lastFetchTime: Date.now(),
-        embeddedCount: EMBEDDED_COUNT
-      }));
-    } catch (e) {
-      // localStorage full or unavailable — fall through
-    }
-  }
-
-  function mergeEpisodes(existing, fetched) {
-    // Merge by ep_id first, then deduplicate by title (keep higher ep_id)
-    var byEpId = {};
-    function add(eps) {
-      for (var i = 0; i < eps.length; i++) {
-        var ep = eps[i];
-        if (!byEpId[ep.ep_id]) {
-          byEpId[ep.ep_id] = ep;
-        }
-      }
-    }
-    add(existing);
-    add(fetched);
-
-    // Deduplicate by title number — B站 may return same episode with different ep_id
-    var byTitle = {};
-    var all = [];
-    for (var key in byEpId) {
-      if (byEpId.hasOwnProperty(key)) {
-        all.push(byEpId[key]);
-      }
-    }
-    for (var j = 0; j < all.length; j++) {
-      var e = all[j];
-      var t = e.title;
-      if (!byTitle[t] || e.ep_id > byTitle[t].ep_id) {
-        byTitle[t] = e;
-      }
-    }
-
-    var merged = [];
-    for (var tk in byTitle) {
-      if (byTitle.hasOwnProperty(tk)) {
-        merged.push(byTitle[tk]);
-      }
-    }
-    merged.sort(function(a, b) { return parseInt(a.title) - parseInt(b.title); });
-    return merged;
-  }
-
-  function fetchWithProxy(proxyUrl) {
-    return fetch(proxyUrl + encodeURIComponent(BILI_API))
-      .then(function(res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function(data) {
-        if (data.code !== 0) throw new Error('API code ' + data.code);
-        var eps = data.result.episodes;
-        return eps.map(function(ep) {
-          return {
-            ep_id: ep.id,
-            title: ep.title,
-            long_title: ep.long_title || '',
-            cover: ep.cover.replace('http://', 'https://'),
-            url: 'https://www.bilibili.com/bangumi/play/ep' + ep.id
-          };
-        });
-      });
-  }
-
-  function fetchFromBilibili() {
-    // Try proxies in sequence until one works
-    function tryNext(i) {
-      if (i >= CORS_PROXIES.length) {
-        return Promise.reject(new Error('All proxies failed'));
-      }
-      return fetchWithProxy(CORS_PROXIES[i]).catch(function() {
-        return tryNext(i + 1);
-      });
-    }
-    return tryNext(0);
-  }
-
-  function updateFooter(count, statusText) {
-    if (!footerEl) return;
-    var html = '数据来源 <a href="https://www.bilibili.com/bangumi/play/ss28747" target="_blank" rel="noopener">Bilibili</a>';
-    html += ' · 共 <strong>' + count + '</strong> 集';
-    if (statusText) html += ' · <span style="color:#09b389">' + statusText + '</span>';
-    footerEl.innerHTML = html;
-  }
-
-  function shouldCheckUpdate(cached) {
-    if (!cached) return true;
-    return (Date.now() - cached.lastFetchTime) > CHECK_INTERVAL;
-  }
-
-  function showEmptyState() {
+  // Init
+  if (EPISODES.length === 0) {
     document.getElementById('episode-cover').classList.remove('loading');
     document.getElementById('episode-cover').style.display = 'none';
     document.getElementById('episode-title').textContent = '暂无剧集数据';
     document.getElementById('episode-link').removeAttribute('href');
     document.getElementById('episode-link-title').removeAttribute('href');
-    rerollBtn.disabled = true;
-  }
-
-  function init() {
-    rerollBtn.addEventListener('click', onReroll);
-
-    var cached = loadFromCache();
-
-    // Use cache if still fresh
-    if (cached && cached.episodes && !shouldCheckUpdate(cached)) {
-      episodePool = cached.episodes;
-      updateFooter(episodePool.length, '已是最新');
-      displayEpisode(getRandomIdx());
-      return;
-    }
-
-    // Need to check for updates
-    var currentCount = (cached && cached.episodes) ? cached.episodes.length : EMBEDDED_COUNT;
-    updateFooter(currentCount, '检查更新中...');
-
-    fetchFromBilibili()
-      .then(function(fetched) {
-        var base = (cached && cached.episodes) ? cached.episodes : EPISODES;
-        var merged = mergeEpisodes(base, fetched);
-        var newCount = merged.length - base.length;
-
-        episodePool = merged;
-        saveToCache(merged);
-
-        if (newCount > 0) {
-          updateFooter(merged.length, '+' + newCount + ' 新剧集');
-        } else {
-          updateFooter(merged.length, '已是最新');
-        }
-
-        if (episodePool.length === 0) {
-          showEmptyState();
-        } else {
-          displayEpisode(getRandomIdx());
-        }
-      })
-      .catch(function(err) {
-        // Fetch failed — use cache or embedded fallback
-        console.warn('更新检查失败，使用本地数据: ' + err.message);
-        if (cached && cached.episodes) {
-          episodePool = cached.episodes;
-        }
-        saveToCache(episodePool); // bump lastFetchTime so we don't retry too often
-        updateFooter(episodePool.length, '使用本地数据');
-
-        if (episodePool.length === 0) {
-          showEmptyState();
-        } else {
-          displayEpisode(getRandomIdx());
-        }
-      });
-  }
-
-  if (EPISODES.length === 0) {
-    showEmptyState();
-    updateFooter(0, '无数据');
+    document.getElementById('reroll-btn').disabled = true;
   } else {
-    init();
+    document.getElementById('reroll-btn').addEventListener('click', onReroll);
+    displayEpisode(getRandomIdx());
   }
 })();
 </script>
