@@ -1,8 +1,24 @@
 import json
+import os
+import sys
+
+# Allow running from any directory
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+os.chdir(SCRIPT_DIR)
+sys.path.insert(0, SCRIPT_DIR)
+
+import log_utils
+
+log_utils.info('开始生成 index.html')
 
 # Read episode data
-with open('D:/Code/daily-fan/episodes.json', 'r', encoding='utf-8') as f:
-    episodes = json.load(f)
+try:
+    with open('episodes.json', 'r', encoding='utf-8') as f:
+        episodes = json.load(f)
+    log_utils.info(f'读取 episodes.json: {len(episodes)} 集')
+except Exception as e:
+    log_utils.error(f'读取 episodes.json 失败: {e}')
+    raise
 
 # Build compact JS array string
 ep_js_lines = []
@@ -19,8 +35,13 @@ for ep in episodes:
 episodes_js = "const EPISODES = [\n" + ",\n".join(ep_js_lines) + "\n];"
 
 # Write separate episodes.js
-with open('D:/Code/daily-fan/episodes.js', 'w', encoding='utf-8') as f:
-    f.write(episodes_js + '\n')
+try:
+    with open('episodes.js', 'w', encoding='utf-8') as f:
+        f.write(episodes_js + '\n')
+    log_utils.info(f'写入 episodes.js: {len(episodes_js):,} bytes')
+except Exception as e:
+    log_utils.error(f'写入 episodes.js 失败: {e}')
+    raise
 print(f'episodes.js written, {len(episodes)} episodes')
 
 html = r'''<!DOCTYPE html>
@@ -334,9 +355,15 @@ html = r'''<!DOCTYPE html>
 
 html = html.replace('__EP_COUNT__', str(len(episodes)))
 
-with open('D:/Code/daily-fan/index.html', 'w', encoding='utf-8') as f:
-    f.write(html)
+try:
+    with open('index.html', 'w', encoding='utf-8') as f:
+        f.write(html)
+    log_utils.info(f'写入 index.html: {len(html.encode("utf-8")):,} bytes')
+except Exception as e:
+    log_utils.error(f'写入 index.html 失败: {e}')
+    raise
 
 print(f'index.html written successfully')
 print(f'Episodes embedded: {len(episodes)}')
 print(f'File size: {len(html.encode("utf-8")):,} bytes')
+log_utils.info(f'生成完成: {len(episodes)} 集, HTML {len(html.encode("utf-8")):,} bytes')
