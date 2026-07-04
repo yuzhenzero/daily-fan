@@ -50,7 +50,7 @@ html = r'''<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 100'><text y='.88em' x='60' text-anchor='middle' font-size='86'>🌰</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 100'><text y='.88em' x='80' text-anchor='middle' font-size='80'>🌰</text></svg>">
   <title>凡人修仙传 — 每日一集</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
