@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 100'><text y='.88em' x='80' text-anchor='middle' font-size='80'>🌰</text></svg>">
+  <link rel="icon" id="favicon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><text y='.9em' font-size='56'>🌰</text></svg>">
   <title>凡人修仙传 — 每日一集</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -231,6 +231,20 @@
   <script>
 (function() {
   var currentIdx = -1;
+
+  // ---- Render emoji favicon ----
+  (function setFavicon() {
+    var canvas = document.createElement('canvas');
+    canvas.width = 64;
+    canvas.height = 64;
+    var ctx = canvas.getContext('2d');
+    ctx.font = '56px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🌰', 32, 32);
+    var favicon = document.getElementById('favicon');
+    favicon.href = canvas.toDataURL('image/png');
+  })();
 
   function getRandomIdx() {
     if (EPISODES.length === 0) return -1;
