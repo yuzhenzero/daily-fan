@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>凡人修仙传 — 每日一集</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f1a;
+      --card-bg: #1a1a2e;
+      --text: #e0e0e0;
+      --text-secondary: #a0a0b8;
+      --accent: #09b389;
+      --accent-hover: #0cc9a0;
+      --link: #00a1d6;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background-image: radial-gradient(ellipse at 50% 0%, #1a1a3e 0%, var(--bg) 60%);
+    }
+
+    #app {
+      width: 100%;
+      max-width: 520px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #09b389, #0cc9a0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    #card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      opacity: 1;
+    }
+
+    #card.fade-out { opacity: 0; transform: translateY(8px); }
+
+    #card:hover {
+      box-shadow: 0 12px 40px rgba(9, 179, 137, 0.15), 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    #episode-link {
+      display: block;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 20px;
+      line-height: 0;
+      transition: transform 0.2s ease;
+    }
+
+    #episode-link:hover { transform: scale(1.02); }
+
+    #episode-cover {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      background: #2a2a3e;
+      border-radius: 12px;
+      display: block;
+    }
+
+    #episode-cover.loading {
+      animation: shimmer 1.5s infinite;
+      background: linear-gradient(90deg, #2a2a3e 25%, #35355a 50%, #2a2a3e 75%);
+      background-size: 200% 100%;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    #episode-link-title {
+      display: block;
+      text-decoration: none;
+      color: var(--text);
+      margin-bottom: 24px;
+      transition: color 0.2s ease;
+    }
+
+    #episode-link-title:hover { color: var(--link); }
+
+    #episode-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.5;
+      word-break: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .ep-num {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    #reroll-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 14px 36px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, #09b389, #078f6e);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 4px 16px rgba(9, 179, 137, 0.3);
+    }
+
+    #reroll-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(9, 179, 137, 0.45);
+    }
+
+    #reroll-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 8px rgba(9, 179, 137, 0.3);
+    }
+
+    #reroll-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-icon {
+      display: inline-block;
+      font-size: 1.3rem;
+      transition: transform 0.4s ease;
+    }
+
+    #reroll-btn:active .btn-icon { transform: rotate(180deg); }
+
+    footer {
+      margin-top: 24px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    footer a { color: var(--link); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      #card { padding: 16px; border-radius: 12px; }
+      header h1 { font-size: 1.6rem; }
+      #episode-title { font-size: 1.1rem; }
+      #reroll-btn { padding: 12px 28px; font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>凡人修仙传</h1>
+      <p class="subtitle">随缘看一集</p>
+    </header>
+
+    <main id="card">
+      <a id="episode-link" href="#" target="_blank" rel="noopener">
+        <img id="episode-cover" class="loading"
+             src=""
+             alt=""
+             onerror="handleImageError(this)">
+      </a>
+
+      <a id="episode-link-title" href="#" target="_blank" rel="noopener">
+        <h2 id="episode-title">加载中...</h2>
+      </a>
+
+      <button id="reroll-btn">
+        <span class="btn-icon">🎲</span> 换一集
+      </button>
+    </main>
+
+    <footer>
+      <p>数据来源 <a href="https://www.bilibili.com/bangumi/play/ss28747" target="_blank" rel="noopener">Bilibili</a> · 共 279 集 · 更新于 2026-07-04</p>
+    </footer>
+  </div>
+
+  <noscript>
+    <div style="text-align:center;padding:40px;color:#e0e0e0;font-family:sans-serif;">
+      <p>请启用 JavaScript 以使用此页面。</p>
+    </div>
+  </noscript>
+
+  <script>
+const EPISODES = [
+    {"ep_id":733316,"title":"1","long_title":"凡人风起天南1重制版","cover":"https://i0.hdslb.com/bfs/archive/5ac571880f996eead5af559de2509228e20164cf.jpg","url":"https://www.bilibili.com/bangumi/play/ep733316"},
+    {"ep_id":733317,"title":"2","long_title":"凡人风起天南2重制版","cover":"https://i0.hdslb.com/bfs/archive/90ccd86f772635d556ea4b1395480cac6e3d13c4.jpg","url":"https://www.bilibili.com/bangumi/play/ep733317"},
+    {"ep_id":733318,"title":"3","long_title":"凡人风起天南3重制版","cover":"https://i0.hdslb.com/bfs/archive/8866bb6b4baffabd02e17a6a5733fbff878fccbe.png","url":"https://www.bilibili.com/bangumi/play/ep733318"},
+    {"ep_id":733319,"title":"4","long_title":"凡人风起天南4重制版","cover":"https://i0.hdslb.com/bfs/archive/95f82868ba17989090f925e70926c5158cba43c4.jpg","url":"https://www.bilibili.com/bangumi/play/ep733319"},
+    {"ep_id":733320,"title":"5","long_title":"凡人风起天南5重制版","cover":"https://i0.hdslb.com/bfs/archive/b6d973be1b418c351dab1027f9215f35ad9fa6f0.jpg","url":"https://www.bilibili.com/bangumi/play/ep733320"},
+    {"ep_id":733321,"title":"6","long_title":"凡人风起天南6重制版","cover":"https://i0.hdslb.com/bfs/archive/96ea36b2d451c407122d88a2effe902829cdb713.jpg","url":"https://www.bilibili.com/bangumi/play/ep733321"},
+    {"ep_id":733322,"title":"7","long_title":"凡人风起天南7重制版","cover":"https://i0.hdslb.com/bfs/archive/4d97d81189f5251aa5bdc5bf48478c31366f01e3.jpg","url":"https://www.bilibili.com/bangumi/play/ep733322"},
+    {"ep_id":733323,"title":"8","long_title":"凡人风起天南8重制版","cover":"https://i0.hdslb.com/bfs/archive/806fb853f895211fb02351f3a3be47c5cadb9a62.jpg","url":"https://www.bilibili.com/bangumi/play/ep733323"},
+    {"ep_id":733324,"title":"9","long_title":"凡人风起天南9重制版","cover":"https://i0.hdslb.com/bfs/archive/7446b5c1f1a8cd762251cac6a02a56f8b90d6abf.jpg","url":"https://www.bilibili.com/bangumi/play/ep733324"},
+    {"ep_id":733325,"title":"10","long_title":"凡人风起天南10重制版","cover":"https://i0.hdslb.com/bfs/archive/fbce24a2098ec663d4e72d4ec93ac84710edaefa.jpg","url":"https://www.bilibili.com/bangumi/play/ep733325"},
+    {"ep_id":733326,"title":"11","long_title":"凡人风起天南11重制版","cover":"https://i0.hdslb.com/bfs/archive/466fcdfc92e268f9e0973bb0316bfba3cd324c6b.jpg","url":"https://www.bilibili.com/bangumi/play/ep733326"},
+    {"ep_id":733327,"title":"12","long_title":"凡人风起天南12重制版","cover":"https://i0.hdslb.com/bfs/archive/8163fd7cad4a4646406cbcc7f698c0f407788b40.jpg","url":"https://www.bilibili.com/bangumi/play/ep733327"},
+    {"ep_id":733328,"title":"13","long_title":"凡人风起天南13重制版","cover":"https://i0.hdslb.com/bfs/archive/9e8ab0e71efccbe7c5f25a9eb82a4f08ded996f1.jpg","url":"https://www.bilibili.com/bangumi/play/ep733328"},
+    {"ep_id":733329,"title":"14","long_title":"凡人风起天南14重制版","cover":"https://i0.hdslb.com/bfs/archive/52a3174f8dd63ba931be1e07054ab5a80c0e6c38.jpg","url":"https://www.bilibili.com/bangumi/play/ep733329"},
+    {"ep_id":733330,"title":"15","long_title":"凡人风起天南15重制版","cover":"https://i0.hdslb.com/bfs/archive/25bb050a55383d3d5b28f46a988f7df81f517f9a.jpg","url":"https://www.bilibili.com/bangumi/play/ep733330"},
+    {"ep_id":733331,"title":"16","long_title":"凡人风起天南16重制版","cover":"https://i0.hdslb.com/bfs/archive/e306f909aa6fd426188e74126cfcf5c29d56cfc7.jpg","url":"https://www.bilibili.com/bangumi/play/ep733331"},
+    {"ep_id":733332,"title":"17","long_title":"凡人风起天南17重制版","cover":"https://i0.hdslb.com/bfs/archive/278f5c0fc8ee7d7f28cc58bbb2492ef3d732e3b2.jpg","url":"https://www.bilibili.com/bangumi/play/ep733332"},
+    {"ep_id":733333,"title":"18","long_title":"燕家堡之战1重制版","cover":"https://i0.hdslb.com/bfs/archive/b39f607dee6fb14a8a32f0e4b042b16ad53b2dd5.jpg","url":"https://www.bilibili.com/bangumi/play/ep733333"},
+    {"ep_id":733334,"title":"19","long_title":"燕家堡之战2重制版","cover":"https://i0.hdslb.com/bfs/archive/5e218f2c7fe73833b423ba5028ac8bf70024236e.jpg","url":"https://www.bilibili.com/bangumi/play/ep733334"},
+    {"ep_id":733335,"title":"20","long_title":"燕家堡之战3重制版","cover":"https://i0.hdslb.com/bfs/archive/59986d4ad509ad90627fd6fb8d396e4899ded23f.jpg","url":"https://www.bilibili.com/bangumi/play/ep733335"},
+    {"ep_id":733336,"title":"21","long_title":"燕家堡之战4重制版","cover":"https://i0.hdslb.com/bfs/archive/620348125a388659302a6f6e3bf7e875baec1041.jpg","url":"https://www.bilibili.com/bangumi/play/ep733336"},
+    {"ep_id":428988,"title":"22","long_title":"魔道争锋1","cover":"https://i0.hdslb.com/bfs/archive/c1b000146bb65de51de62cd19abe327af81e6497.jpg","url":"https://www.bilibili.com/bangumi/play/ep428988"},
+    {"ep_id":428989,"title":"23","long_title":"魔道争锋2","cover":"https://i0.hdslb.com/bfs/archive/de7822d69876790fcfce5906d60d6db7dfdac3ec.jpg","url":"https://www.bilibili.com/bangumi/play/ep428989"},
+    {"ep_id":428990,"title":"24","long_title":"魔道争锋3","cover":"https://i0.hdslb.com/bfs/archive/d7e2ea48954e003c9c32a62beac1adbdd17a13d4.jpg","url":"https://www.bilibili.com/bangumi/play/ep428990"},
+    {"ep_id":428991,"title":"25","long_title":"魔道争锋4","cover":"https://i0.hdslb.com/bfs/archive/a7b860303bd8562894e604d43da1abd7f33219e5.jpg","url":"https://www.bilibili.com/bangumi/play/ep428991"},
+    {"ep_id":428992,"title":"26","long_title":"魔道争锋5","cover":"https://i0.hdslb.com/bfs/archive/926975864736eeb105e22186b18379136e20f765.jpg","url":"https://www.bilibili.com/bangumi/play/ep428992"},
+    {"ep_id":428993,"title":"27","long_title":"魔道争锋6","cover":"https://i0.hdslb.com/bfs/archive/540045152483aced99b9ebf7c26de6a7c7a525da.jpg","url":"https://www.bilibili.com/bangumi/play/ep428993"},
+    {"ep_id":428994,"title":"28","long_title":"魔道争锋7","cover":"https://i0.hdslb.com/bfs/archive/3a8dc4df8db1659202f316d222ca865bac2e5d2e.jpg","url":"https://www.bilibili.com/bangumi/play/ep428994"},
+    {"ep_id":428995,"title":"29","long_title":"魔道争锋8","cover":"https://i0.hdslb.com/bfs/archive/580fcc4c651cb91906c03ddff20352ae2ac5be3d.jpg","url":"https://www.bilibili.com/bangumi/play/ep428995"},
+    {"ep_id":428996,"title":"30","long_title":"魔道争锋9","cover":"https://i0.hdslb.com/bfs/archive/9aca673d276b1dfb4c490a64404e655db2dbfe24.jpg","url":"https://www.bilibili.com/bangumi/play/ep428996"},
+    {"ep_id":446721,"title":"31","long_title":"魔道争锋10","cover":"https://i0.hdslb.com/bfs/archive/3fae57a7a9b7c05e80247ce8c39234231655e1be.jpg","url":"https://www.bilibili.com/bangumi/play/ep446721"},
+    {"ep_id":446722,"title":"32","long_title":"魔道争锋11","cover":"https://i0.hdslb.com/bfs/archive/c26495ec07d8e50ceb994db4fc36fad350445bff.jpg","url":"https://www.bilibili.com/bangumi/play/ep446722"},
+    {"ep_id":446723,"title":"33","long_title":"魔道争锋12","cover":"https://i0.hdslb.com/bfs/archive/46f1fd456ee3953d55ac70c0945dd77a1cac3113.jpg","url":"https://www.bilibili.com/bangumi/play/ep446723"},
+    {"ep_id":446724,"title":"34","long_title":"魔道争锋13","cover":"https://i0.hdslb.com/bfs/archive/2b51ecd20cf7bf07bf394e9e8a7949c655df20e5.jpg","url":"https://www.bilibili.com/bangumi/play/ep446724"},
+    {"ep_id":446725,"title":"35","long_title":"魔道争锋14","cover":"https://i0.hdslb.com/bfs/archive/1b7b165fc53e8116db3401e3539782dd7df55470.jpg","url":"https://www.bilibili.com/bangumi/play/ep446725"},
+    {"ep_id":467542,"title":"36","long_title":"魔道争锋15","cover":"https://i0.hdslb.com/bfs/archive/b9cd96261105b2fca93306c06064359385af5c6a.jpg","url":"https://www.bilibili.com/bangumi/play/ep467542"},
+    {"ep_id":467543,"title":"37","long_title":"魔道争锋16","cover":"https://i0.hdslb.com/bfs/archive/6f0db74311b204e77f505f8dc1a4fe42423dc7eb.jpg","url":"https://www.bilibili.com/bangumi/play/ep467543"},
+    {"ep_id":467544,"title":"38","long_title":"魔道争锋17","cover":"https://i0.hdslb.com/bfs/archive/e2b35ac003d95e80042660381120a993184201d3.jpg","url":"https://www.bilibili.com/bangumi/play/ep467544"},
+    {"ep_id":467545,"title":"39","long_title":"魔道争锋18","cover":"https://i0.hdslb.com/bfs/archive/620cee5a9a13e0e7f10fff26704457810c495449.jpg","url":"https://www.bilibili.com/bangumi/play/ep467545"},
+    {"ep_id":471417,"title":"40","long_title":"魔道争锋19","cover":"https://i0.hdslb.com/bfs/archive/cb4adae76ca346c9a5e237816c458e511c21a495.jpg","url":"https://www.bilibili.com/bangumi/play/ep471417"},
+    {"ep_id":471418,"title":"41","long_title":"魔道争锋20","cover":"https://i0.hdslb.com/bfs/archive/89c28b12dda097ef2291b0ca9eb5b78c5451e03f.jpg","url":"https://www.bilibili.com/bangumi/play/ep471418"},
+    {"ep_id":471419,"title":"42","long_title":"魔道争锋21","cover":"https://i0.hdslb.com/bfs/archive/39db31fa5b7e265358f3f8ef9e5cafa89eaaafe4.jpg","url":"https://www.bilibili.com/bangumi/play/ep471419"},
+    {"ep_id":471894,"title":"43","long_title":"魔道争锋22","cover":"https://i0.hdslb.com/bfs/archive/8f1ad16766d47b0c3d4449a5b68429da8a71d7f2.jpg","url":"https://www.bilibili.com/bangumi/play/ep471894"},
+    {"ep_id":471895,"title":"44","long_title":"魔道争锋23","cover":"https://i0.hdslb.com/bfs/archive/747b951d3068173cbc35a2e5dc4dc75d58d48d55.jpg","url":"https://www.bilibili.com/bangumi/play/ep471895"},
+    {"ep_id":471896,"title":"45","long_title":"魔道争锋24","cover":"https://i0.hdslb.com/bfs/archive/c9f680d896ab605450fef72f32f67bd6028fd4ca.jpg","url":"https://www.bilibili.com/bangumi/play/ep471896"},
+    {"ep_id":471897,"title":"46","long_title":"魔道争锋25","cover":"https://i0.hdslb.com/bfs/archive/67c7f91e88ea994a71e1dd53c61090ed6e8e4f82.jpg","url":"https://www.bilibili.com/bangumi/play/ep471897"},
+    {"ep_id":471898,"title":"47","long_title":"再别天南1","cover":"https://i0.hdslb.com/bfs/archive/48500fbe0af3f049a74c9562151d8a1939ff9090.jpg","url":"https://www.bilibili.com/bangumi/play/ep471898"},
+    {"ep_id":471899,"title":"48","long_title":"再别天南2","cover":"https://i0.hdslb.com/bfs/archive/9dcb47c8b284e0d2b77651acaafc8900ba94cdc4.jpg","url":"https://www.bilibili.com/bangumi/play/ep471899"},
+    {"ep_id":471900,"title":"49","long_title":"再别天南3","cover":"https://i0.hdslb.com/bfs/archive/2a42913f48bd018ef731862bff166070a0f221f1.jpg","url":"https://www.bilibili.com/bangumi/play/ep471900"},
+    {"ep_id":471901,"title":"50","long_title":"再别天南4","cover":"https://i0.hdslb.com/bfs/archive/e380dadc150a208921491ea4698a59f55daeb763.jpg","url":"https://www.bilibili.com/bangumi/play/ep471901"},
+    {"ep_id":471902,"title":"51","long_title":"再别天南5","cover":"https://i0.hdslb.com/bfs/archive/70c896303abc6157747a821bee765fe4d37c9a61.jpg","url":"https://www.bilibili.com/bangumi/play/ep471902"},
+    {"ep_id":471903,"title":"52","long_title":"再别天南6","cover":"https://i0.hdslb.com/bfs/archive/0ce27d0c32316df3cb58740b6d42a70cc0b6aefe.jpg","url":"https://www.bilibili.com/bangumi/play/ep471903"},
+    {"ep_id":471904,"title":"53","long_title":"再别天南7","cover":"https://i0.hdslb.com/bfs/archive/10a041c1f4bd0c2a1a658a20ec032e9a33fe73be.jpg","url":"https://www.bilibili.com/bangumi/play/ep471904"},
+    {"ep_id":471905,"title":"54","long_title":"再别天南8","cover":"https://i0.hdslb.com/bfs/archive/19fc211677a6d43b809bd2c17a77094a316bf6dc.jpg","url":"https://www.bilibili.com/bangumi/play/ep471905"},
+    {"ep_id":471906,"title":"55","long_title":"再别天南9","cover":"https://i0.hdslb.com/bfs/archive/a988d710803b5972f578bcdfb226672f47c946a1.jpg","url":"https://www.bilibili.com/bangumi/play/ep471906"},
+    {"ep_id":471907,"title":"56","long_title":"再别天南10","cover":"https://i0.hdslb.com/bfs/archive/36ecaafd69a1c99f9873d082d5f537b3c05648ab.jpg","url":"https://www.bilibili.com/bangumi/play/ep471907"},
+    {"ep_id":471908,"title":"57","long_title":"再别天南11","cover":"https://i0.hdslb.com/bfs/archive/d6ab057ad77531616cd65824d47638ff54235fff.jpg","url":"https://www.bilibili.com/bangumi/play/ep471908"},
+    {"ep_id":471909,"title":"58","long_title":"再别天南12","cover":"https://i0.hdslb.com/bfs/archive/f6615326e3ba6e7bc779d7253f38ebbe72329378.jpg","url":"https://www.bilibili.com/bangumi/play/ep471909"},
+    {"ep_id":471910,"title":"59","long_title":"再别天南13","cover":"https://i0.hdslb.com/bfs/archive/a5928d587f4d83508b8406dbab885f5edc36c818.jpg","url":"https://www.bilibili.com/bangumi/play/ep471910"},
+    {"ep_id":471911,"title":"60","long_title":"再别天南14","cover":"https://i0.hdslb.com/bfs/archive/e4a9a6fdad668c1dd87c493cbdb1f14e90dfe385.jpg","url":"https://www.bilibili.com/bangumi/play/ep471911"},
+    {"ep_id":471912,"title":"61","long_title":"初入星海1","cover":"https://i0.hdslb.com/bfs/archive/5c023a5fe08bbfc5bf0f637ade6cb4669be55fc0.jpg","url":"https://www.bilibili.com/bangumi/play/ep471912"},
+    {"ep_id":471913,"title":"62","long_title":"初入星海2","cover":"https://i0.hdslb.com/bfs/archive/7a0c6469c087742cae598ac9470d3bbc83421357.jpg","url":"https://www.bilibili.com/bangumi/play/ep471913"},
+    {"ep_id":471914,"title":"63","long_title":"初入星海3","cover":"https://i0.hdslb.com/bfs/archive/f3d16da793c2d4e6b07f3805d6c28ef839efa825.jpg","url":"https://www.bilibili.com/bangumi/play/ep471914"},
+    {"ep_id":471915,"title":"64","long_title":"初入星海4","cover":"https://i0.hdslb.com/bfs/archive/d74a28fb5140db41c5480b44732a7be33bc540ad.jpg","url":"https://www.bilibili.com/bangumi/play/ep471915"},
+    {"ep_id":471916,"title":"65","long_title":"初入星海5","cover":"https://i0.hdslb.com/bfs/archive/17c432f86b9f969f93711e3686a2140885010ed6.jpg","url":"https://www.bilibili.com/bangumi/play/ep471916"},
+    {"ep_id":471917,"title":"66","long_title":"初入星海6","cover":"https://i0.hdslb.com/bfs/archive/29af70a593c8ab55a7affd9796f82aee5d90a9fc.jpg","url":"https://www.bilibili.com/bangumi/play/ep471917"},
+    {"ep_id":471918,"title":"67","long_title":"初入星海7","cover":"https://i0.hdslb.com/bfs/archive/2387bab651aecd53fc9e9022c9435859fe48dff9.jpg","url":"https://www.bilibili.com/bangumi/play/ep471918"},
+    {"ep_id":471919,"title":"68","long_title":"初入星海8","cover":"https://i0.hdslb.com/bfs/archive/12af647351c21942f874cb99986a9bf23a303dd9.jpg","url":"https://www.bilibili.com/bangumi/play/ep471919"},
+    {"ep_id":514852,"title":"69","long_title":"初入星海9","cover":"https://i0.hdslb.com/bfs/archive/f5f66eab194f7ff4a30ba8fdfafe9c946eac944e.jpg","url":"https://www.bilibili.com/bangumi/play/ep514852"},
+    {"ep_id":514853,"title":"70","long_title":"初入星海10","cover":"https://i0.hdslb.com/bfs/archive/6202919291ac23be57c0092d015566bcdbb6f3ca.jpg","url":"https://www.bilibili.com/bangumi/play/ep514853"},
+    {"ep_id":514854,"title":"71","long_title":"初入星海11","cover":"https://i0.hdslb.com/bfs/archive/fb830e94f860cf227ee76dd962cabc095110f422.jpg","url":"https://www.bilibili.com/bangumi/play/ep514854"},
+    {"ep_id":514855,"title":"72","long_title":"初入星海12","cover":"https://i0.hdslb.com/bfs/archive/d78acb89f15d1f54abf1a12bdfd1a9c49d11730e.jpg","url":"https://www.bilibili.com/bangumi/play/ep514855"},
+    {"ep_id":762895,"title":"73","long_title":"星海飞驰序章1","cover":"https://i0.hdslb.com/bfs/archive/4118c96d8b37769cf398ff168624132dca766248.jpg","url":"https://www.bilibili.com/bangumi/play/ep762895"},
+    {"ep_id":762896,"title":"74","long_title":"星海飞驰序章2","cover":"https://i0.hdslb.com/bfs/archive/a133af1a1868c979b76cd3926657f3a022fac70e.jpg","url":"https://www.bilibili.com/bangumi/play/ep762896"},
+    {"ep_id":762897,"title":"75","long_title":"星海飞驰序章3","cover":"https://i0.hdslb.com/bfs/archive/e0e2eeac11a28810527a23f41d2f89ddfc8ab08b.jpg","url":"https://www.bilibili.com/bangumi/play/ep762897"},
+    {"ep_id":762898,"title":"76","long_title":"星海飞驰序章4","cover":"https://i0.hdslb.com/bfs/archive/fed63869bc0f682f54e70db72bdd28882b0e3aa6.jpg","url":"https://www.bilibili.com/bangumi/play/ep762898"},
+    {"ep_id":788322,"title":"77","long_title":"星海飞驰1","cover":"https://i0.hdslb.com/bfs/archive/ca4e00d8e688675a571199d903f9a871d66e2366.jpg","url":"https://www.bilibili.com/bangumi/play/ep788322"},
+    {"ep_id":788422,"title":"78","long_title":"星海飞驰2","cover":"https://i0.hdslb.com/bfs/archive/ff72054726a77d346f5c09b9646c722797115a57.jpg","url":"https://www.bilibili.com/bangumi/play/ep788422"},
+    {"ep_id":788423,"title":"79","long_title":"星海飞驰3","cover":"https://i0.hdslb.com/bfs/archive/b21e118d61b4e7a85dbb7e675d6448aa784e4ea2.jpg","url":"https://www.bilibili.com/bangumi/play/ep788423"},
+    {"ep_id":788424,"title":"80","long_title":"星海飞驰4","cover":"https://i0.hdslb.com/bfs/archive/89a545e4c3746352876e04b39a724970d6ab5843.jpg","url":"https://www.bilibili.com/bangumi/play/ep788424"},
+    {"ep_id":788425,"title":"81","long_title":"星海飞驰5","cover":"https://i0.hdslb.com/bfs/archive/e8f335ca0769acdc36e61b9019dd6e167259ac40.jpg","url":"https://www.bilibili.com/bangumi/play/ep788425"},
+    {"ep_id":788426,"title":"82","long_title":"星海飞驰6","cover":"https://i0.hdslb.com/bfs/archive/2b5291b89dedf5a243de0057896322daec994e0f.png","url":"https://www.bilibili.com/bangumi/play/ep788426"},
+    {"ep_id":788427,"title":"83","long_title":"星海飞驰7","cover":"https://i0.hdslb.com/bfs/archive/9cee670111c362e5c72523ca48b00835de1e42f3.jpg","url":"https://www.bilibili.com/bangumi/play/ep788427"},
+    {"ep_id":788428,"title":"84","long_title":"星海飞驰8","cover":"https://i0.hdslb.com/bfs/archive/7f9d2d1d0bef353f01be226bab2c9767f8ffd757.jpg","url":"https://www.bilibili.com/bangumi/play/ep788428"},
+    {"ep_id":788429,"title":"85","long_title":"星海飞驰9","cover":"https://i0.hdslb.com/bfs/archive/1290cd5e316df339bc6def17986cfadbb3bb4bad.jpg","url":"https://www.bilibili.com/bangumi/play/ep788429"},
+    {"ep_id":788430,"title":"86","long_title":"星海飞驰10","cover":"https://i0.hdslb.com/bfs/archive/4f269bfe109469fade82434f61856786e46edef2.jpg","url":"https://www.bilibili.com/bangumi/play/ep788430"},
+    {"ep_id":788431,"title":"87","long_title":"星海飞驰11","cover":"https://i0.hdslb.com/bfs/archive/1d7a610e4ee038c437e3755fbb1be63c383d0960.jpg","url":"https://www.bilibili.com/bangumi/play/ep788431"},
+    {"ep_id":788432,"title":"88","long_title":"星海飞驰12","cover":"https://i0.hdslb.com/bfs/archive/ec766a1f49cd997e6662f4c42c36f7845a88b132.jpg","url":"https://www.bilibili.com/bangumi/play/ep788432"},
+    {"ep_id":788433,"title":"89","long_title":"星海飞驰13","cover":"https://i0.hdslb.com/bfs/archive/bc28c634d7873e601b69990468eaa6ba63fb32ac.jpg","url":"https://www.bilibili.com/bangumi/play/ep788433"},
+    {"ep_id":788434,"title":"90","long_title":"星海飞驰14","cover":"https://i0.hdslb.com/bfs/archive/7afe10bd075996ef59f05d905e10f518ca74db7a.jpg","url":"https://www.bilibili.com/bangumi/play/ep788434"},
+    {"ep_id":788435,"title":"91","long_title":"星海飞驰15","cover":"https://i0.hdslb.com/bfs/archive/07de4f51f2b56814217ae776d52b12a38baa546c.jpg","url":"https://www.bilibili.com/bangumi/play/ep788435"},
+    {"ep_id":788436,"title":"92","long_title":"星海飞驰16","cover":"https://i0.hdslb.com/bfs/archive/2a13db771af33e8b0286b267fa9fda9aaf07a639.jpg","url":"https://www.bilibili.com/bangumi/play/ep788436"},
+    {"ep_id":788437,"title":"93","long_title":"星海飞驰17","cover":"https://i0.hdslb.com/bfs/archive/dbb15905da63aaa1d0f47513cdb9a5562d1eb4a2.jpg","url":"https://www.bilibili.com/bangumi/play/ep788437"},
+    {"ep_id":788438,"title":"94","long_title":"星海飞驰18","cover":"https://i0.hdslb.com/bfs/archive/d885b9785ccf128d55b5eefc4e27594c8d3c0b11.jpg","url":"https://www.bilibili.com/bangumi/play/ep788438"},
+    {"ep_id":788439,"title":"95","long_title":"星海飞驰19","cover":"https://i0.hdslb.com/bfs/archive/14e8ee1539f586ed417a01df60d856f8e909064c.jpg","url":"https://www.bilibili.com/bangumi/play/ep788439"},
+    {"ep_id":788440,"title":"96","long_title":"星海飞驰20","cover":"https://i0.hdslb.com/bfs/archive/160122bf5e6a3308b37aa192de0f72d8a4a4ab56.jpg","url":"https://www.bilibili.com/bangumi/play/ep788440"},
+    {"ep_id":788441,"title":"97","long_title":"星海飞驰21","cover":"https://i0.hdslb.com/bfs/archive/ffa13cb7647bcaceaaf770f72a7ca84dd02eef5e.jpg","url":"https://www.bilibili.com/bangumi/play/ep788441"},
+    {"ep_id":788442,"title":"98","long_title":"星海飞驰22","cover":"https://i0.hdslb.com/bfs/archive/cca3bbd44060c3b3b044b1a5ed89c4d43f002417.jpg","url":"https://www.bilibili.com/bangumi/play/ep788442"},
+    {"ep_id":788443,"title":"99","long_title":"星海飞驰23","cover":"https://i0.hdslb.com/bfs/archive/9da2b5ee269cde8883ac96187e1d2f56b636a5ef.jpg","url":"https://www.bilibili.com/bangumi/play/ep788443"},
+    {"ep_id":788444,"title":"100","long_title":"星海飞驰24","cover":"https://i0.hdslb.com/bfs/archive/86e70bc1af0f4fef81b4e1c38b9d776576f7c021.jpg","url":"https://www.bilibili.com/bangumi/play/ep788444"},
+    {"ep_id":788445,"title":"101","long_title":"星海飞驰25","cover":"https://i0.hdslb.com/bfs/archive/a2189e9679c1e92097e40bf0bfe9f86e371817c3.jpg","url":"https://www.bilibili.com/bangumi/play/ep788445"},
+    {"ep_id":788446,"title":"102","long_title":"星海飞驰26","cover":"https://i0.hdslb.com/bfs/archive/5e0a16d5d96ec6ae5b2ca6a11d215a3becaa1744.jpg","url":"https://www.bilibili.com/bangumi/play/ep788446"},
+    {"ep_id":788447,"title":"103","long_title":"星海飞驰27","cover":"https://i0.hdslb.com/bfs/archive/253128701ab785a4f25a3d68f0612331b1582896.jpg","url":"https://www.bilibili.com/bangumi/play/ep788447"},
+    {"ep_id":788448,"title":"104","long_title":"星海飞驰28","cover":"https://i0.hdslb.com/bfs/archive/2ac4223993da6bca4bb6739cf9ed19819fb7c939.jpg","url":"https://www.bilibili.com/bangumi/play/ep788448"},
+    {"ep_id":788449,"title":"105","long_title":"星海飞驰29","cover":"https://i0.hdslb.com/bfs/archive/48ca66cafb0e5a931f7fde65e25634bb10551961.jpg","url":"https://www.bilibili.com/bangumi/play/ep788449"},
+    {"ep_id":788450,"title":"106","long_title":"星海飞驰30","cover":"https://i0.hdslb.com/bfs/archive/787b162c2fd4245563d8e60d3bf252463ffe916f.jpg","url":"https://www.bilibili.com/bangumi/play/ep788450"},
+    {"ep_id":788451,"title":"107","long_title":"星海飞驰31","cover":"https://i0.hdslb.com/bfs/archive/c4e0f77c18905bef46f4ce203ab942de673d7bd8.jpg","url":"https://www.bilibili.com/bangumi/play/ep788451"},
+    {"ep_id":788452,"title":"108","long_title":"星海飞驰32","cover":"https://i0.hdslb.com/bfs/archive/791cb57bb198e9d52008e04257ad1d3104fd9aa6.jpg","url":"https://www.bilibili.com/bangumi/play/ep788452"},
+    {"ep_id":788453,"title":"109","long_title":"星海飞驰33","cover":"https://i0.hdslb.com/bfs/archive/16fd45f8c3bf6ba8d2536b6e5432c275ffad9e8e.jpg","url":"https://www.bilibili.com/bangumi/play/ep788453"},
+    {"ep_id":788454,"title":"110","long_title":"星海飞驰34","cover":"https://i0.hdslb.com/bfs/archive/d9f5f8b030c1b2ff295213287133a234043c19f8.jpg","url":"https://www.bilibili.com/bangumi/play/ep788454"},
+    {"ep_id":788455,"title":"111","long_title":"星海飞驰35","cover":"https://i0.hdslb.com/bfs/archive/20fb07914ca80bea6917de9bad560c03d9ed1194.jpg","url":"https://www.bilibili.com/bangumi/play/ep788455"},
+    {"ep_id":788456,"title":"112","long_title":"星海飞驰36","cover":"https://i0.hdslb.com/bfs/archive/5a8db7a03b91b8d44173e1cd41d6defc459f07e1.jpg","url":"https://www.bilibili.com/bangumi/play/ep788456"},
+    {"ep_id":788457,"title":"113","long_title":"星海飞驰37","cover":"https://i0.hdslb.com/bfs/archive/dc0ed96953ae200dd7fcbc236adceed44818f74d.jpg","url":"https://www.bilibili.com/bangumi/play/ep788457"},
+    {"ep_id":788458,"title":"114","long_title":"星海飞驰38","cover":"https://i0.hdslb.com/bfs/archive/46f75c5f00de63d0142f8556440c51d7e4b0a647.jpg","url":"https://www.bilibili.com/bangumi/play/ep788458"},
+    {"ep_id":788459,"title":"115","long_title":"星海飞驰39","cover":"https://i0.hdslb.com/bfs/archive/eac3baab381291d1ca1d2752b7e453e9e4d9eb35.jpg","url":"https://www.bilibili.com/bangumi/play/ep788459"},
+    {"ep_id":788460,"title":"116","long_title":"星海飞驰40","cover":"https://i0.hdslb.com/bfs/archive/2813a7a6c9070b6ed7215e2b1a2f539ac604ecd5.jpg","url":"https://www.bilibili.com/bangumi/play/ep788460"},
+    {"ep_id":788461,"title":"117","long_title":"星海飞驰41","cover":"https://i0.hdslb.com/bfs/archive/5878774c44b5f19b470ff9c9a678a227957b6b0d.jpg","url":"https://www.bilibili.com/bangumi/play/ep788461"},
+    {"ep_id":788462,"title":"118","long_title":"星海飞驰42","cover":"https://i0.hdslb.com/bfs/archive/b7a4ea7af08ff0769a3643826da60de9a9f99880.jpg","url":"https://www.bilibili.com/bangumi/play/ep788462"},
+    {"ep_id":788463,"title":"119","long_title":"星海飞驰43","cover":"https://i0.hdslb.com/bfs/archive/30149a29dd4d5b8aa6d2f6984889abebf91045ef.jpg","url":"https://www.bilibili.com/bangumi/play/ep788463"},
+    {"ep_id":788464,"title":"120","long_title":"星海飞驰44","cover":"https://i0.hdslb.com/bfs/archive/09d9689e959a8b03eb668ef06d2308b87ed8b15c.jpg","url":"https://www.bilibili.com/bangumi/play/ep788464"},
+    {"ep_id":788465,"title":"121","long_title":"星海飞驰45","cover":"https://i0.hdslb.com/bfs/archive/1e7a55d5c5b6778439860379fb747ab39a073fd9.png","url":"https://www.bilibili.com/bangumi/play/ep788465"},
+    {"ep_id":788466,"title":"122","long_title":"星海飞驰46","cover":"https://i0.hdslb.com/bfs/archive/303deb2c41a2368d4f87c425c2f7678a04e6e99c.jpg","url":"https://www.bilibili.com/bangumi/play/ep788466"},
+    {"ep_id":788467,"title":"123","long_title":"星海飞驰47","cover":"https://i0.hdslb.com/bfs/archive/0f5f96b4545a20cbbdb2358b2fb474b0883c2527.jpg","url":"https://www.bilibili.com/bangumi/play/ep788467"},
+    {"ep_id":788468,"title":"124","long_title":"星海飞驰48","cover":"https://i0.hdslb.com/bfs/archive/2f7090c01b7aeba4e6807890c210a3c9e75c26b2.jpg","url":"https://www.bilibili.com/bangumi/play/ep788468"},
+    {"ep_id":785516,"title":"77","long_title":"星海飞驰1","cover":"https://i0.hdslb.com/bfs/archive/ca4e00d8e688675a571199d903f9a871d66e2366.jpg","url":"https://www.bilibili.com/bangumi/play/ep785516"},
+    {"ep_id":785517,"title":"78","long_title":"星海飞驰2","cover":"https://i0.hdslb.com/bfs/archive/ff72054726a77d346f5c09b9646c722797115a57.jpg","url":"https://www.bilibili.com/bangumi/play/ep785517"},
+    {"ep_id":785518,"title":"79","long_title":"星海飞驰3","cover":"https://i0.hdslb.com/bfs/archive/b21e118d61b4e7a85dbb7e675d6448aa784e4ea2.jpg","url":"https://www.bilibili.com/bangumi/play/ep785518"},
+    {"ep_id":785519,"title":"80","long_title":"星海飞驰4","cover":"https://i0.hdslb.com/bfs/archive/89a545e4c3746352876e04b39a724970d6ab5843.jpg","url":"https://www.bilibili.com/bangumi/play/ep785519"},
+    {"ep_id":785520,"title":"81","long_title":"星海飞驰5","cover":"https://i0.hdslb.com/bfs/archive/e8f335ca0769acdc36e61b9019dd6e167259ac40.jpg","url":"https://www.bilibili.com/bangumi/play/ep785520"},
+    {"ep_id":785521,"title":"82","long_title":"星海飞驰6","cover":"https://i0.hdslb.com/bfs/archive/2b5291b89dedf5a243de0057896322daec994e0f.png","url":"https://www.bilibili.com/bangumi/play/ep785521"},
+    {"ep_id":785522,"title":"83","long_title":"星海飞驰7","cover":"https://i0.hdslb.com/bfs/archive/9cee670111c362e5c72523ca48b00835de1e42f3.jpg","url":"https://www.bilibili.com/bangumi/play/ep785522"},
+    {"ep_id":785523,"title":"84","long_title":"星海飞驰8","cover":"https://i0.hdslb.com/bfs/archive/7f9d2d1d0bef353f01be226bab2c9767f8ffd757.jpg","url":"https://www.bilibili.com/bangumi/play/ep785523"},
+    {"ep_id":785524,"title":"85","long_title":"星海飞驰9","cover":"https://i0.hdslb.com/bfs/archive/1290cd5e316df339bc6def17986cfadbb3bb4bad.jpg","url":"https://www.bilibili.com/bangumi/play/ep785524"},
+    {"ep_id":785525,"title":"86","long_title":"星海飞驰10","cover":"https://i0.hdslb.com/bfs/archive/4f269bfe109469fade82434f61856786e46edef2.jpg","url":"https://www.bilibili.com/bangumi/play/ep785525"},
+    {"ep_id":785526,"title":"87","long_title":"星海飞驰11","cover":"https://i0.hdslb.com/bfs/archive/1d7a610e4ee038c437e3755fbb1be63c383d0960.jpg","url":"https://www.bilibili.com/bangumi/play/ep785526"},
+    {"ep_id":785527,"title":"88","long_title":"星海飞驰12","cover":"https://i0.hdslb.com/bfs/archive/ec766a1f49cd997e6662f4c42c36f7845a88b132.jpg","url":"https://www.bilibili.com/bangumi/play/ep785527"},
+    {"ep_id":785528,"title":"89","long_title":"星海飞驰13","cover":"https://i0.hdslb.com/bfs/archive/bc28c634d7873e601b69990468eaa6ba63fb32ac.jpg","url":"https://www.bilibili.com/bangumi/play/ep785528"},
+    {"ep_id":785529,"title":"90","long_title":"星海飞驰14","cover":"https://i0.hdslb.com/bfs/archive/7afe10bd075996ef59f05d905e10f518ca74db7a.jpg","url":"https://www.bilibili.com/bangumi/play/ep785529"},
+    {"ep_id":785530,"title":"91","long_title":"星海飞驰15","cover":"https://i0.hdslb.com/bfs/archive/07de4f51f2b56814217ae776d52b12a38baa546c.jpg","url":"https://www.bilibili.com/bangumi/play/ep785530"},
+    {"ep_id":785531,"title":"92","long_title":"星海飞驰16","cover":"https://i0.hdslb.com/bfs/archive/2a13db771af33e8b0286b267fa9fda9aaf07a639.jpg","url":"https://www.bilibili.com/bangumi/play/ep785531"},
+    {"ep_id":785532,"title":"93","long_title":"星海飞驰17","cover":"https://i0.hdslb.com/bfs/archive/dbb15905da63aaa1d0f47513cdb9a5562d1eb4a2.jpg","url":"https://www.bilibili.com/bangumi/play/ep785532"},
+    {"ep_id":785533,"title":"94","long_title":"星海飞驰18","cover":"https://i0.hdslb.com/bfs/archive/d885b9785ccf128d55b5eefc4e27594c8d3c0b11.jpg","url":"https://www.bilibili.com/bangumi/play/ep785533"},
+    {"ep_id":785534,"title":"95","long_title":"星海飞驰19","cover":"https://i0.hdslb.com/bfs/archive/14e8ee1539f586ed417a01df60d856f8e909064c.jpg","url":"https://www.bilibili.com/bangumi/play/ep785534"},
+    {"ep_id":785535,"title":"96","long_title":"星海飞驰20","cover":"https://i0.hdslb.com/bfs/archive/160122bf5e6a3308b37aa192de0f72d8a4a4ab56.jpg","url":"https://www.bilibili.com/bangumi/play/ep785535"},
+    {"ep_id":785536,"title":"97","long_title":"星海飞驰21","cover":"https://i0.hdslb.com/bfs/archive/ffa13cb7647bcaceaaf770f72a7ca84dd02eef5e.jpg","url":"https://www.bilibili.com/bangumi/play/ep785536"},
+    {"ep_id":785537,"title":"98","long_title":"星海飞驰22","cover":"https://i0.hdslb.com/bfs/archive/cca3bbd44060c3b3b044b1a5ed89c4d43f002417.jpg","url":"https://www.bilibili.com/bangumi/play/ep785537"},
+    {"ep_id":785538,"title":"99","long_title":"星海飞驰23","cover":"https://i0.hdslb.com/bfs/archive/9da2b5ee269cde8883ac96187e1d2f56b636a5ef.jpg","url":"https://www.bilibili.com/bangumi/play/ep785538"},
+    {"ep_id":785539,"title":"100","long_title":"星海飞驰24","cover":"https://i0.hdslb.com/bfs/archive/86e70bc1af0f4fef81b4e1c38b9d776576f7c021.jpg","url":"https://www.bilibili.com/bangumi/play/ep785539"},
+    {"ep_id":785540,"title":"101","long_title":"星海飞驰25","cover":"https://i0.hdslb.com/bfs/archive/a2189e9679c1e92097e40bf0bfe9f86e371817c3.jpg","url":"https://www.bilibili.com/bangumi/play/ep785540"},
+    {"ep_id":785541,"title":"102","long_title":"星海飞驰26","cover":"https://i0.hdslb.com/bfs/archive/5e0a16d5d96ec6ae5b2ca6a11d215a3becaa1744.jpg","url":"https://www.bilibili.com/bangumi/play/ep785541"},
+    {"ep_id":785542,"title":"103","long_title":"星海飞驰27","cover":"https://i0.hdslb.com/bfs/archive/253128701ab785a4f25a3d68f0612331b1582896.jpg","url":"https://www.bilibili.com/bangumi/play/ep785542"},
+    {"ep_id":785543,"title":"104","long_title":"星海飞驰28","cover":"https://i0.hdslb.com/bfs/archive/2ac4223993da6bca4bb6739cf9ed19819fb7c939.jpg","url":"https://www.bilibili.com/bangumi/play/ep785543"},
+    {"ep_id":785544,"title":"105","long_title":"星海飞驰29","cover":"https://i0.hdslb.com/bfs/archive/48ca66cafb0e5a931f7fde65e25634bb10551961.jpg","url":"https://www.bilibili.com/bangumi/play/ep785544"},
+    {"ep_id":785545,"title":"106","long_title":"星海飞驰30","cover":"https://i0.hdslb.com/bfs/archive/787b162c2fd4245563d8e60d3bf252463ffe916f.jpg","url":"https://www.bilibili.com/bangumi/play/ep785545"},
+    {"ep_id":785546,"title":"107","long_title":"星海飞驰31","cover":"https://i0.hdslb.com/bfs/archive/c4e0f77c18905bef46f4ce203ab942de673d7bd8.jpg","url":"https://www.bilibili.com/bangumi/play/ep785546"},
+    {"ep_id":785547,"title":"108","long_title":"星海飞驰32","cover":"https://i0.hdslb.com/bfs/archive/791cb57bb198e9d52008e04257ad1d3104fd9aa6.jpg","url":"https://www.bilibili.com/bangumi/play/ep785547"},
+    {"ep_id":785548,"title":"109","long_title":"星海飞驰33","cover":"https://i0.hdslb.com/bfs/archive/16fd45f8c3bf6ba8d2536b6e5432c275ffad9e8e.jpg","url":"https://www.bilibili.com/bangumi/play/ep785548"},
+    {"ep_id":785549,"title":"110","long_title":"星海飞驰34","cover":"https://i0.hdslb.com/bfs/archive/d9f5f8b030c1b2ff295213287133a234043c19f8.jpg","url":"https://www.bilibili.com/bangumi/play/ep785549"},
+    {"ep_id":785550,"title":"111","long_title":"星海飞驰35","cover":"https://i0.hdslb.com/bfs/archive/20fb07914ca80bea6917de9bad560c03d9ed1194.jpg","url":"https://www.bilibili.com/bangumi/play/ep785550"},
+    {"ep_id":785551,"title":"112","long_title":"星海飞驰36","cover":"https://i0.hdslb.com/bfs/archive/5a8db7a03b91b8d44173e1cd41d6defc459f07e1.jpg","url":"https://www.bilibili.com/bangumi/play/ep785551"},
+    {"ep_id":785552,"title":"113","long_title":"星海飞驰37","cover":"https://i0.hdslb.com/bfs/archive/dc0ed96953ae200dd7fcbc236adceed44818f74d.jpg","url":"https://www.bilibili.com/bangumi/play/ep785552"},
+    {"ep_id":785553,"title":"114","long_title":"星海飞驰38","cover":"https://i0.hdslb.com/bfs/archive/46f75c5f00de63d0142f8556440c51d7e4b0a647.jpg","url":"https://www.bilibili.com/bangumi/play/ep785553"},
+    {"ep_id":785554,"title":"115","long_title":"星海飞驰39","cover":"https://i0.hdslb.com/bfs/archive/eac3baab381291d1ca1d2752b7e453e9e4d9eb35.jpg","url":"https://www.bilibili.com/bangumi/play/ep785554"},
+    {"ep_id":785555,"title":"116","long_title":"星海飞驰40","cover":"https://i0.hdslb.com/bfs/archive/2813a7a6c9070b6ed7215e2b1a2f539ac604ecd5.jpg","url":"https://www.bilibili.com/bangumi/play/ep785555"},
+    {"ep_id":785556,"title":"117","long_title":"星海飞驰41","cover":"https://i0.hdslb.com/bfs/archive/5878774c44b5f19b470ff9c9a678a227957b6b0d.jpg","url":"https://www.bilibili.com/bangumi/play/ep785556"},
+    {"ep_id":785557,"title":"118","long_title":"星海飞驰42","cover":"https://i0.hdslb.com/bfs/archive/b7a4ea7af08ff0769a3643826da60de9a9f99880.jpg","url":"https://www.bilibili.com/bangumi/play/ep785557"},
+    {"ep_id":785558,"title":"119","long_title":"星海飞驰43","cover":"https://i0.hdslb.com/bfs/archive/30149a29dd4d5b8aa6d2f6984889abebf91045ef.jpg","url":"https://www.bilibili.com/bangumi/play/ep785558"},
+    {"ep_id":785559,"title":"120","long_title":"星海飞驰44","cover":"https://i0.hdslb.com/bfs/archive/09d9689e959a8b03eb668ef06d2308b87ed8b15c.jpg","url":"https://www.bilibili.com/bangumi/play/ep785559"},
+    {"ep_id":785560,"title":"121","long_title":"星海飞驰45","cover":"https://i0.hdslb.com/bfs/archive/1e7a55d5c5b6778439860379fb747ab39a073fd9.png","url":"https://www.bilibili.com/bangumi/play/ep785560"},
+    {"ep_id":785561,"title":"122","long_title":"星海飞驰46","cover":"https://i0.hdslb.com/bfs/archive/303deb2c41a2368d4f87c425c2f7678a04e6e99c.jpg","url":"https://www.bilibili.com/bangumi/play/ep785561"},
+    {"ep_id":785562,"title":"123","long_title":"星海飞驰47","cover":"https://i0.hdslb.com/bfs/archive/0f5f96b4545a20cbbdb2358b2fb474b0883c2527.jpg","url":"https://www.bilibili.com/bangumi/play/ep785562"},
+    {"ep_id":785563,"title":"124","long_title":"星海飞驰48","cover":"https://i0.hdslb.com/bfs/archive/2f7090c01b7aeba4e6807890c210a3c9e75c26b2.jpg","url":"https://www.bilibili.com/bangumi/play/ep785563"},
+    {"ep_id":1231533,"title":"125","long_title":"外海风云1","cover":"https://i0.hdslb.com/bfs/archive/2c22ae7dccc33c7d3b34eaf6f137dbeeff8903c7.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231533"},
+    {"ep_id":1231534,"title":"126","long_title":"外海风云2","cover":"https://i0.hdslb.com/bfs/archive/3b0e138c15b1f8e2f1807c8c3effa47fd454170d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231534"},
+    {"ep_id":1231535,"title":"127","long_title":"外海风云3","cover":"https://i0.hdslb.com/bfs/archive/dfbf019db2cf698fca71dabffde35b699f081b29.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231535"},
+    {"ep_id":1231536,"title":"128","long_title":"外海风云4","cover":"https://i0.hdslb.com/bfs/archive/8244466a7deac5e290af09a7bbfb05459fbf46d7.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231536"},
+    {"ep_id":1391828,"title":"129","long_title":"外海风云5","cover":"https://i0.hdslb.com/bfs/archive/211bc1b48088506032c3614352b85b3f6ed9ec84.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391828"},
+    {"ep_id":1391829,"title":"130","long_title":"外海风云6","cover":"https://i0.hdslb.com/bfs/archive/e54ed6ede494144552c3713d42fcfc8f103bf44e.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391829"},
+    {"ep_id":1391830,"title":"131","long_title":"外海风云7","cover":"https://i0.hdslb.com/bfs/archive/040c1c8210d1ba2b29c483ae4b0a79eebc3b3ff1.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391830"},
+    {"ep_id":1391831,"title":"132","long_title":"外海风云8","cover":"https://i0.hdslb.com/bfs/bangumi/image/475a8b12cf4adb4c59b7e8f31c35891cbb360f19.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391831"},
+    {"ep_id":1391832,"title":"133","long_title":"外海风云9","cover":"https://i0.hdslb.com/bfs/archive/f1e27bd94dabc1907d125888ddf0e51abb6b6624.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391832"},
+    {"ep_id":1391833,"title":"134","long_title":"外海风云10","cover":"https://i0.hdslb.com/bfs/archive/40b09a957869df6bfaeaff0c1bc73e935554e321.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391833"},
+    {"ep_id":1391834,"title":"135","long_title":"外海风云11","cover":"https://i0.hdslb.com/bfs/archive/846dbbd9b17292a5fc948327444b083be1357878.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391834"},
+    {"ep_id":1391835,"title":"136","long_title":"外海风云12","cover":"https://i0.hdslb.com/bfs/archive/a45f52998b52ca85376be71e9fd4e93dab055718.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391835"},
+    {"ep_id":1391836,"title":"137","long_title":"外海风云13","cover":"https://i0.hdslb.com/bfs/archive/2da96bd3c81cc11ac4ba23847ec2a054ea10c778.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391836"},
+    {"ep_id":1391837,"title":"138","long_title":"外海风云14","cover":"https://i0.hdslb.com/bfs/bangumi/image/9c996f4357a66ce9daa4c12c1e542f3d56fb1eb0.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391837"},
+    {"ep_id":1391838,"title":"139","long_title":"外海风云15","cover":"https://i0.hdslb.com/bfs/bangumi/image/e6a830b52f9f20712d35e771c8059e187e82ba02.png","url":"https://www.bilibili.com/bangumi/play/ep1391838"},
+    {"ep_id":1391839,"title":"140","long_title":"外海风云16","cover":"https://i0.hdslb.com/bfs/bangumi/image/568f43ccbbd05c061de03fe09574c6d665911c74.png","url":"https://www.bilibili.com/bangumi/play/ep1391839"},
+    {"ep_id":1391840,"title":"141","long_title":"外海风云17","cover":"https://i0.hdslb.com/bfs/archive/b1884ee7448de61613f7823f0a339e52ff22e2ac.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391840"},
+    {"ep_id":1391841,"title":"142","long_title":"外海风云18","cover":"https://i0.hdslb.com/bfs/archive/2ccf81d47fff27904384a7e9f5b8796e932ab89d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391841"},
+    {"ep_id":1391842,"title":"143","long_title":"外海风云19","cover":"https://i0.hdslb.com/bfs/archive/4cf00360133a4b8aec34050766e2fe3aacf99b18.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391842"},
+    {"ep_id":1391843,"title":"144","long_title":"外海风云20","cover":"https://i0.hdslb.com/bfs/archive/c8f575eee916e79e76bf24ac129e3f5e88816d6d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391843"},
+    {"ep_id":1391844,"title":"145","long_title":"外海风云21","cover":"https://i0.hdslb.com/bfs/archive/b46f7eb9e7ad8951283376fd2cce0f00d4a53074.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391844"},
+    {"ep_id":1391845,"title":"146","long_title":"外海风云22","cover":"https://i0.hdslb.com/bfs/archive/1f6a2a5636c3e96dee7adf2ffd7aa890ada3f9f9.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391845"},
+    {"ep_id":1391846,"title":"147","long_title":"外海风云23","cover":"https://i0.hdslb.com/bfs/archive/50cff4188ec3c4fbb9b03d643f73185120770b41.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391846"},
+    {"ep_id":1391847,"title":"148","long_title":"外海风云24","cover":"https://i0.hdslb.com/bfs/archive/81ce1a3bd387ebfad709133d66bde1194025e301.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391847"},
+    {"ep_id":1391848,"title":"149","long_title":"外海风云25","cover":"https://i0.hdslb.com/bfs/archive/5fdce206c206d72109298a5ee2a107753d44b8b4.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391848"},
+    {"ep_id":1391849,"title":"150","long_title":"外海风云26","cover":"https://i0.hdslb.com/bfs/archive/3a1b5afd875920c865265e1b73e21a60c2c7b903.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391849"},
+    {"ep_id":1391850,"title":"151","long_title":"外海风云27","cover":"https://i0.hdslb.com/bfs/archive/d9338d9a79ad6a783c8c0fa2de5fdcde919bc070.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391850"},
+    {"ep_id":1391851,"title":"152","long_title":"外海风云28","cover":"https://i0.hdslb.com/bfs/archive/08b351e1f17f90062ca612a44400c752eda51aca.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391851"},
+    {"ep_id":1391852,"title":"153","long_title":"重返天南1","cover":"https://i0.hdslb.com/bfs/archive/b427744340d27c76eec8ae704d125c01ed91446d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391852"},
+    {"ep_id":1391853,"title":"154","long_title":"重返天南2","cover":"https://i0.hdslb.com/bfs/archive/365c290ae6d1586fffa0c6bb2ae225f62591fdbb.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391853"},
+    {"ep_id":1391854,"title":"155","long_title":"重返天南3","cover":"https://i0.hdslb.com/bfs/archive/2f9b7abe63da325aea61f0b8ffc89933adc4d784.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391854"},
+    {"ep_id":1391855,"title":"156","long_title":"重返天南4","cover":"https://i0.hdslb.com/bfs/archive/c74a4d20ed890a35a3e191cdd1a2dfb4723b5d25.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391855"},
+    {"ep_id":1391856,"title":"157","long_title":"重返天南5","cover":"https://i0.hdslb.com/bfs/archive/6cd34cb5d912d52aec6bb68908df56389b53ecb3.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391856"},
+    {"ep_id":1391857,"title":"158","long_title":"重返天南6","cover":"https://i0.hdslb.com/bfs/archive/3b181e520ec7805146d294e2a88989f484295d38.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391857"},
+    {"ep_id":1391858,"title":"159","long_title":"重返天南7","cover":"https://i0.hdslb.com/bfs/archive/7d7184bd10ba75376c5182c09058844cb647e6bd.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391858"},
+    {"ep_id":1391859,"title":"160","long_title":"重返天南8","cover":"https://i0.hdslb.com/bfs/archive/15ab5ec81b9d00800b3bc15f0453d45284fa491c.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391859"},
+    {"ep_id":1391860,"title":"161","long_title":"重返天南9","cover":"https://i0.hdslb.com/bfs/archive/3c93034a2b6369697218a225cd98c2711e77fbb2.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391860"},
+    {"ep_id":1391861,"title":"162","long_title":"重返天南10","cover":"https://i0.hdslb.com/bfs/archive/b01caaebbe28c16cac04a0a110f42fc80b505bf0.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391861"},
+    {"ep_id":1391862,"title":"163","long_title":"重返天南11","cover":"https://i0.hdslb.com/bfs/archive/c13b6632702145732c3bac58565d41efa01ba204.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391862"},
+    {"ep_id":1391863,"title":"164","long_title":"重返天南12","cover":"https://i0.hdslb.com/bfs/archive/2dee02b3934a2df63a9172479926aef79e577cbc.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391863"},
+    {"ep_id":1391864,"title":"165","long_title":"重返天南13","cover":"https://i0.hdslb.com/bfs/archive/464c53ec648ef510936eb8bc30c53dcf7e0c93ee.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391864"},
+    {"ep_id":1391865,"title":"166","long_title":"重返天南14","cover":"https://i0.hdslb.com/bfs/archive/9c79a0b9580bb03249f4ae10ca261eb276c86c73.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391865"},
+    {"ep_id":1391866,"title":"167","long_title":"重返天南15","cover":"https://i0.hdslb.com/bfs/archive/0775365eb024a332594270bb48e18c7601fe9b00.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391866"},
+    {"ep_id":1391867,"title":"168","long_title":"重返天南16","cover":"https://i0.hdslb.com/bfs/archive/8d291aa062157c6b186c1657502f0c71b05e32d3.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391867"},
+    {"ep_id":1391868,"title":"169","long_title":"重返天南17","cover":"https://i0.hdslb.com/bfs/archive/a7add2279743a79d1055475f9e25a91faa9337c5.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391868"},
+    {"ep_id":1391869,"title":"170","long_title":"重返天南18","cover":"https://i0.hdslb.com/bfs/archive/32517a82f04d0d41d403947ef80cfff2cbe60cee.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391869"},
+    {"ep_id":1391870,"title":"171","long_title":"重返天南19","cover":"https://i0.hdslb.com/bfs/archive/404bdcbd1d5d37686de7730fb324c9f5c14efe0f.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391870"},
+    {"ep_id":1391871,"title":"172","long_title":"重返天南20","cover":"https://i0.hdslb.com/bfs/archive/2b223f3f8bc23d839c0fec68f0ab386e44ccc62e.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391871"},
+    {"ep_id":1391872,"title":"173","long_title":"重返天南21","cover":"https://i0.hdslb.com/bfs/archive/92c5e0dd53342c6a4a13ecfe554c714404dd5e9d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391872"},
+    {"ep_id":1391873,"title":"174","long_title":"重返天南22","cover":"https://i0.hdslb.com/bfs/archive/03bba5c60ff3b11f9d784ec105dd8618f83aa5ce.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391873"},
+    {"ep_id":1391874,"title":"175","long_title":"重返天南23","cover":"https://i0.hdslb.com/bfs/archive/0b63949a8699eb387cd80af86b8965e98125b38a.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391874"},
+    {"ep_id":1391875,"title":"176","long_title":"重返天南24","cover":"https://i0.hdslb.com/bfs/archive/8d0d3d4bf1740f7239339911915f24f3ac1c82a7.jpg","url":"https://www.bilibili.com/bangumi/play/ep1391875"},
+    {"ep_id":1231537,"title":"129","long_title":"外海风云5","cover":"https://i0.hdslb.com/bfs/archive/211bc1b48088506032c3614352b85b3f6ed9ec84.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231537"},
+    {"ep_id":1231538,"title":"130","long_title":"外海风云6","cover":"https://i0.hdslb.com/bfs/archive/e54ed6ede494144552c3713d42fcfc8f103bf44e.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231538"},
+    {"ep_id":1231539,"title":"131","long_title":"外海风云7","cover":"https://i0.hdslb.com/bfs/archive/040c1c8210d1ba2b29c483ae4b0a79eebc3b3ff1.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231539"},
+    {"ep_id":1231540,"title":"132","long_title":"外海风云8","cover":"https://i0.hdslb.com/bfs/bangumi/image/475a8b12cf4adb4c59b7e8f31c35891cbb360f19.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231540"},
+    {"ep_id":1231541,"title":"133","long_title":"外海风云9","cover":"https://i0.hdslb.com/bfs/archive/f1e27bd94dabc1907d125888ddf0e51abb6b6624.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231541"},
+    {"ep_id":1231542,"title":"134","long_title":"外海风云10","cover":"https://i0.hdslb.com/bfs/archive/40b09a957869df6bfaeaff0c1bc73e935554e321.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231542"},
+    {"ep_id":1231543,"title":"135","long_title":"外海风云11","cover":"https://i0.hdslb.com/bfs/archive/846dbbd9b17292a5fc948327444b083be1357878.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231543"},
+    {"ep_id":1231544,"title":"136","long_title":"外海风云12","cover":"https://i0.hdslb.com/bfs/archive/a45f52998b52ca85376be71e9fd4e93dab055718.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231544"},
+    {"ep_id":1231545,"title":"137","long_title":"外海风云13","cover":"https://i0.hdslb.com/bfs/archive/2da96bd3c81cc11ac4ba23847ec2a054ea10c778.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231545"},
+    {"ep_id":1231546,"title":"138","long_title":"外海风云14","cover":"https://i0.hdslb.com/bfs/bangumi/image/9c996f4357a66ce9daa4c12c1e542f3d56fb1eb0.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231546"},
+    {"ep_id":1231547,"title":"139","long_title":"外海风云15","cover":"https://i0.hdslb.com/bfs/bangumi/image/e6a830b52f9f20712d35e771c8059e187e82ba02.png","url":"https://www.bilibili.com/bangumi/play/ep1231547"},
+    {"ep_id":1231548,"title":"140","long_title":"外海风云16","cover":"https://i0.hdslb.com/bfs/bangumi/image/568f43ccbbd05c061de03fe09574c6d665911c74.png","url":"https://www.bilibili.com/bangumi/play/ep1231548"},
+    {"ep_id":1231549,"title":"141","long_title":"外海风云17","cover":"https://i0.hdslb.com/bfs/archive/b1884ee7448de61613f7823f0a339e52ff22e2ac.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231549"},
+    {"ep_id":1231550,"title":"142","long_title":"外海风云18","cover":"https://i0.hdslb.com/bfs/archive/2ccf81d47fff27904384a7e9f5b8796e932ab89d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231550"},
+    {"ep_id":1231551,"title":"143","long_title":"外海风云19","cover":"https://i0.hdslb.com/bfs/archive/4cf00360133a4b8aec34050766e2fe3aacf99b18.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231551"},
+    {"ep_id":1231552,"title":"144","long_title":"外海风云20","cover":"https://i0.hdslb.com/bfs/archive/c8f575eee916e79e76bf24ac129e3f5e88816d6d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231552"},
+    {"ep_id":1231553,"title":"145","long_title":"外海风云21","cover":"https://i0.hdslb.com/bfs/archive/b46f7eb9e7ad8951283376fd2cce0f00d4a53074.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231553"},
+    {"ep_id":1231554,"title":"146","long_title":"外海风云22","cover":"https://i0.hdslb.com/bfs/archive/1f6a2a5636c3e96dee7adf2ffd7aa890ada3f9f9.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231554"},
+    {"ep_id":1231555,"title":"147","long_title":"外海风云23","cover":"https://i0.hdslb.com/bfs/archive/50cff4188ec3c4fbb9b03d643f73185120770b41.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231555"},
+    {"ep_id":1231556,"title":"148","long_title":"外海风云24","cover":"https://i0.hdslb.com/bfs/archive/81ce1a3bd387ebfad709133d66bde1194025e301.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231556"},
+    {"ep_id":1231557,"title":"149","long_title":"外海风云25","cover":"https://i0.hdslb.com/bfs/archive/5fdce206c206d72109298a5ee2a107753d44b8b4.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231557"},
+    {"ep_id":1231558,"title":"150","long_title":"外海风云26","cover":"https://i0.hdslb.com/bfs/archive/3a1b5afd875920c865265e1b73e21a60c2c7b903.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231558"},
+    {"ep_id":1231559,"title":"151","long_title":"外海风云27","cover":"https://i0.hdslb.com/bfs/archive/d9338d9a79ad6a783c8c0fa2de5fdcde919bc070.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231559"},
+    {"ep_id":1231560,"title":"152","long_title":"外海风云28","cover":"https://i0.hdslb.com/bfs/archive/08b351e1f17f90062ca612a44400c752eda51aca.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231560"},
+    {"ep_id":1231561,"title":"153","long_title":"重返天南1","cover":"https://i0.hdslb.com/bfs/archive/b427744340d27c76eec8ae704d125c01ed91446d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231561"},
+    {"ep_id":1231562,"title":"154","long_title":"重返天南2","cover":"https://i0.hdslb.com/bfs/archive/365c290ae6d1586fffa0c6bb2ae225f62591fdbb.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231562"},
+    {"ep_id":1231563,"title":"155","long_title":"重返天南3","cover":"https://i0.hdslb.com/bfs/archive/2f9b7abe63da325aea61f0b8ffc89933adc4d784.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231563"},
+    {"ep_id":1231564,"title":"156","long_title":"重返天南4","cover":"https://i0.hdslb.com/bfs/archive/c74a4d20ed890a35a3e191cdd1a2dfb4723b5d25.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231564"},
+    {"ep_id":1231565,"title":"157","long_title":"重返天南5","cover":"https://i0.hdslb.com/bfs/archive/6cd34cb5d912d52aec6bb68908df56389b53ecb3.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231565"},
+    {"ep_id":1231566,"title":"158","long_title":"重返天南6","cover":"https://i0.hdslb.com/bfs/archive/3b181e520ec7805146d294e2a88989f484295d38.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231566"},
+    {"ep_id":1231567,"title":"159","long_title":"重返天南7","cover":"https://i0.hdslb.com/bfs/archive/7d7184bd10ba75376c5182c09058844cb647e6bd.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231567"},
+    {"ep_id":1231568,"title":"160","long_title":"重返天南8","cover":"https://i0.hdslb.com/bfs/archive/15ab5ec81b9d00800b3bc15f0453d45284fa491c.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231568"},
+    {"ep_id":1231569,"title":"161","long_title":"重返天南9","cover":"https://i0.hdslb.com/bfs/archive/3c93034a2b6369697218a225cd98c2711e77fbb2.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231569"},
+    {"ep_id":1231570,"title":"162","long_title":"重返天南10","cover":"https://i0.hdslb.com/bfs/archive/b01caaebbe28c16cac04a0a110f42fc80b505bf0.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231570"},
+    {"ep_id":1231571,"title":"163","long_title":"重返天南11","cover":"https://i0.hdslb.com/bfs/archive/c13b6632702145732c3bac58565d41efa01ba204.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231571"},
+    {"ep_id":1231572,"title":"164","long_title":"重返天南12","cover":"https://i0.hdslb.com/bfs/archive/2dee02b3934a2df63a9172479926aef79e577cbc.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231572"},
+    {"ep_id":1231573,"title":"165","long_title":"重返天南13","cover":"https://i0.hdslb.com/bfs/archive/464c53ec648ef510936eb8bc30c53dcf7e0c93ee.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231573"},
+    {"ep_id":1231574,"title":"166","long_title":"重返天南14","cover":"https://i0.hdslb.com/bfs/archive/9c79a0b9580bb03249f4ae10ca261eb276c86c73.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231574"},
+    {"ep_id":1231575,"title":"167","long_title":"重返天南15","cover":"https://i0.hdslb.com/bfs/archive/0775365eb024a332594270bb48e18c7601fe9b00.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231575"},
+    {"ep_id":1231576,"title":"168","long_title":"重返天南16","cover":"https://i0.hdslb.com/bfs/archive/8d291aa062157c6b186c1657502f0c71b05e32d3.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231576"},
+    {"ep_id":1231577,"title":"169","long_title":"重返天南17","cover":"https://i0.hdslb.com/bfs/archive/a7add2279743a79d1055475f9e25a91faa9337c5.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231577"},
+    {"ep_id":1231578,"title":"170","long_title":"重返天南18","cover":"https://i0.hdslb.com/bfs/archive/32517a82f04d0d41d403947ef80cfff2cbe60cee.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231578"},
+    {"ep_id":1231579,"title":"171","long_title":"重返天南19","cover":"https://i0.hdslb.com/bfs/archive/404bdcbd1d5d37686de7730fb324c9f5c14efe0f.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231579"},
+    {"ep_id":1231580,"title":"172","long_title":"重返天南20","cover":"https://i0.hdslb.com/bfs/archive/2b223f3f8bc23d839c0fec68f0ab386e44ccc62e.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231580"},
+    {"ep_id":1231581,"title":"173","long_title":"重返天南21","cover":"https://i0.hdslb.com/bfs/archive/92c5e0dd53342c6a4a13ecfe554c714404dd5e9d.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231581"},
+    {"ep_id":1231582,"title":"174","long_title":"重返天南22","cover":"https://i0.hdslb.com/bfs/archive/03bba5c60ff3b11f9d784ec105dd8618f83aa5ce.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231582"},
+    {"ep_id":1231583,"title":"175","long_title":"重返天南23","cover":"https://i0.hdslb.com/bfs/archive/0b63949a8699eb387cd80af86b8965e98125b38a.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231583"},
+    {"ep_id":1231584,"title":"176","long_title":"重返天南24","cover":"https://i0.hdslb.com/bfs/archive/8d0d3d4bf1740f7239339911915f24f3ac1c82a7.jpg","url":"https://www.bilibili.com/bangumi/play/ep1231584"},
+    {"ep_id":3854801,"title":"177","long_title":"慕兰之战01","cover":"https://i0.hdslb.com/bfs/bangumi/image/e2b00ef6a5b379079c48bed175fb19fbb761ac7a.png","url":"https://www.bilibili.com/bangumi/play/ep3854801"},
+    {"ep_id":3854802,"title":"178","long_title":"慕兰之战02","cover":"https://i0.hdslb.com/bfs/archive/81094069877034f44d177298a692fcde832cdb01.jpg","url":"https://www.bilibili.com/bangumi/play/ep3854802"},
+    {"ep_id":3854803,"title":"179","long_title":"慕兰之战03","cover":"https://i0.hdslb.com/bfs/archive/c8df761dcf2a97e5ef6d45f2328f4108367d07b1.jpg","url":"https://www.bilibili.com/bangumi/play/ep3854803"},
+    {"ep_id":3854804,"title":"180","long_title":"慕兰之战04","cover":"https://i0.hdslb.com/bfs/archive/74607e7d6d9f77309744edc7d760cc50248011a4.jpg","url":"https://www.bilibili.com/bangumi/play/ep3854804"},
+    {"ep_id":4292425,"title":"181","long_title":"慕兰之战05","cover":"https://i0.hdslb.com/bfs/archive/dfea03e922029b1e42faae2c23654a15e1f4b6cb.jpg","url":"https://www.bilibili.com/bangumi/play/ep4292425"},
+    {"ep_id":3854805,"title":"181","long_title":"慕兰之战05","cover":"https://i0.hdslb.com/bfs/archive/dfea03e922029b1e42faae2c23654a15e1f4b6cb.jpg","url":"https://www.bilibili.com/bangumi/play/ep3854805"},
+    {"ep_id":4292426,"title":"182","long_title":"慕兰之战06","cover":"https://i0.hdslb.com/bfs/archive/acf368deec3c4117e66aca4a7b805aa708045d60.jpg","url":"https://www.bilibili.com/bangumi/play/ep4292426"}
+];
+
+(function() {
+  var currentIdx = -1;
+
+  function getRandomIdx() {
+    if (EPISODES.length === 0) return -1;
+    if (EPISODES.length === 1) return 0;
+    var idx;
+    do {
+      idx = Math.floor(Math.random() * EPISODES.length);
+    } while (idx === currentIdx);
+    return idx;
+  }
+
+  function displayEpisode(idx) {
+    var ep = EPISODES[idx];
+    if (!ep) return;
+
+    var img = document.getElementById('episode-cover');
+    img.classList.remove('loading');
+    img.src = ep.cover;
+    img.alt = ep.long_title || ('第' + ep.title + '集');
+
+    var titleEl = document.getElementById('episode-title');
+    var displayTitle;
+    if (ep.long_title) {
+      displayTitle = '第<span class="ep-num">' + ep.title + '</span>集 ' + ep.long_title;
+    } else {
+      displayTitle = '第<span class="ep-num">' + ep.title + '</span>集';
+    }
+    titleEl.innerHTML = displayTitle;
+
+    var linkImg = document.getElementById('episode-link');
+    var linkTitle = document.getElementById('episode-link-title');
+    linkImg.href = ep.url;
+    linkTitle.href = ep.url;
+
+    currentIdx = idx;
+  }
+
+  function onReroll() {
+    var idx = getRandomIdx();
+    if (idx < 0) return;
+
+    var card = document.getElementById('card');
+    card.classList.add('fade-out');
+    setTimeout(function() {
+      displayEpisode(idx);
+      card.classList.remove('fade-out');
+    }, 200);
+  }
+
+  window.handleImageError = function(img) {
+    img.classList.remove('loading');
+    img.src = 'data:image/svg+xml,' + encodeURIComponent(
+      '<svg xmlns="http://www.w3.org/2000/svg" width="480" height="270" viewBox="0 0 480 270">' +
+      '<rect fill="#2a2a3e" width="480" height="270"/>' +
+      '<text fill="#a0a0b8" font-family="sans-serif" font-size="18" x="50%" y="50%" text-anchor="middle" dy=".3em">封面加载失败</text>' +
+      '</svg>'
+    );
+    img.alt = '封面加载失败';
+  };
+
+  // Init
+  if (EPISODES.length === 0) {
+    document.getElementById('episode-cover').classList.remove('loading');
+    document.getElementById('episode-cover').style.display = 'none';
+    document.getElementById('episode-title').textContent = '暂无剧集数据';
+    document.getElementById('episode-link').removeAttribute('href');
+    document.getElementById('episode-link-title').removeAttribute('href');
+    document.getElementById('reroll-btn').disabled = true;
+  } else {
+    document.getElementById('reroll-btn').addEventListener('click', onReroll);
+    displayEpisode(getRandomIdx());
+  }
+})();
+</script>
+</body>
+</html>
