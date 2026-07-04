@@ -23,7 +23,8 @@ jobs:
           curl -s "https://api.bilibili.com/pgc/view/web/season?season_id=28747" -o season_data.json
 
       - name: Extract & deduplicate episodes
-        run: python -c "
+        run: |
+          python -c "
           import json
           with open('season_data.json','r',encoding='utf-8') as f:
               d=json.load(f)
@@ -37,13 +38,13 @@ jobs:
                       'title':ep['title'],
                       'long_title':ep.get('long_title',''),
                       'cover':ep['cover'].replace('http://','https://'),
-                      'url':f'https://www.bilibili.com/bangumi/play/ep{ep[\"id\"]}'
+                      'url':'https://www.bilibili.com/bangumi/play/ep'+str(ep['id'])
                   }
           cleaned=sorted(items.values(),key=lambda e:int(e['title']))
           with open('episodes.json','w',encoding='utf-8') as f:
               json.dump(cleaned,f,ensure_ascii=False,indent=2)
           print(f'{len(eps)} raw -> {len(cleaned)} unique')
-        "
+          "
 
       - name: Regenerate HTML
         run: python generate_html.py
@@ -52,7 +53,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add index.html episodes.json
+          git add index.html episodes.json episodes.js
           if git diff --cached --quiet; then
             echo "No changes, skipping commit"
           else
