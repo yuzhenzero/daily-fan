@@ -1,5 +1,4 @@
 import json
-import sys
 
 # Read episode data
 with open('D:/Code/daily-fan/episodes.json', 'r', encoding='utf-8') as f:
@@ -19,12 +18,12 @@ for ep in episodes:
     )
 episodes_js = "const EPISODES = [\n" + ",\n".join(ep_js_lines) + "\n];"
 
-# HTML template
-html_template = r'''<!DOCTYPE html>
+html = r'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
   <title>凡人修仙传 — 每日一集</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,8 +33,8 @@ html_template = r'''<!DOCTYPE html>
       --card-bg: #1a1a2e;
       --text: #e0e0e0;
       --text-secondary: #a0a0b8;
-      --accent: #e67e22;
-      --accent-hover: #f0973a;
+      --accent: #09b389;
+      --accent-hover: #0cc9a0;
       --link: #00a1d6;
     }
 
@@ -67,7 +66,7 @@ html_template = r'''<!DOCTYPE html>
     header h1 {
       font-size: 2rem;
       font-weight: 700;
-      background: linear-gradient(135deg, #e67e22, #f5c842);
+      background: linear-gradient(135deg, #09b389, #0cc9a0);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -93,7 +92,7 @@ html_template = r'''<!DOCTYPE html>
     #card.fade-out { opacity: 0; transform: translateY(8px); }
 
     #card:hover {
-      box-shadow: 0 12px 40px rgba(230, 126, 34, 0.15), 0 2px 8px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 12px 40px rgba(9, 179, 137, 0.15), 0 2px 8px rgba(0, 0, 0, 0.2);
     }
 
     #episode-link {
@@ -161,22 +160,22 @@ html_template = r'''<!DOCTYPE html>
       font-size: 1.1rem;
       font-weight: 600;
       color: #fff;
-      background: linear-gradient(135deg, #e67e22, #d35400);
+      background: linear-gradient(135deg, #09b389, #078f6e);
       border: none;
       border-radius: 50px;
       cursor: pointer;
       transition: all 0.25s ease;
-      box-shadow: 0 4px 16px rgba(230, 126, 34, 0.3);
+      box-shadow: 0 4px 16px rgba(9, 179, 137, 0.3);
     }
 
     #reroll-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(230, 126, 34, 0.45);
+      box-shadow: 0 6px 24px rgba(9, 179, 137, 0.45);
     }
 
     #reroll-btn:active {
       transform: translateY(0);
-      box-shadow: 0 2px 8px rgba(230, 126, 34, 0.3);
+      box-shadow: 0 2px 8px rgba(9, 179, 137, 0.3);
     }
 
     #reroll-btn:disabled {
@@ -223,6 +222,7 @@ html_template = r'''<!DOCTYPE html>
         <img id="episode-cover" class="loading"
              src=""
              alt=""
+             referrerpolicy="no-referrer"
              onerror="handleImageError(this)">
       </a>
 
@@ -236,7 +236,7 @@ html_template = r'''<!DOCTYPE html>
     </main>
 
     <footer>
-      <p>数据来源 <a href="https://www.bilibili.com/bangumi/play/ss28747" target="_blank" rel="noopener">Bilibili</a> · 共 __EP_COUNT__ 集 · 更新于 2026-07-04</p>
+      <p id="footer-status">数据来源 <a href="https://www.bilibili.com/bangumi/play/ss28747" target="_blank" rel="noopener">Bilibili</a> · 共 __EP_COUNT__ 集 · 更新于 2026-07-04</p>
     </footer>
   </div>
 
@@ -250,20 +250,33 @@ html_template = r'''<!DOCTYPE html>
 __EPISODES_JS__
 
 (function() {
+  var STORAGE_KEY = 'fanren_episodes';
+  var CHECK_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7 days
+  var CORS_PROXIES = [
+    'https://api.allorigins.win/raw?url=',
+    'https://corsproxy.io/?'
+  ];
+  var BILI_API = 'https://api.bilibili.com/pgc/view/web/season?season_id=28747';
+  var EMBEDDED_COUNT = EPISODES.length;
   var currentIdx = -1;
+  var episodePool = EPISODES;
+
+  var footerEl = document.getElementById('footer-status');
+  var rerollBtn = document.getElementById('reroll-btn');
+  var cardEl = document.getElementById('card');
 
   function getRandomIdx() {
-    if (EPISODES.length === 0) return -1;
-    if (EPISODES.length === 1) return 0;
+    if (episodePool.length === 0) return -1;
+    if (episodePool.length === 1) return 0;
     var idx;
     do {
-      idx = Math.floor(Math.random() * EPISODES.length);
+      idx = Math.floor(Math.random() * episodePool.length);
     } while (idx === currentIdx);
     return idx;
   }
 
   function displayEpisode(idx) {
-    var ep = EPISODES[idx];
+    var ep = episodePool[idx];
     if (!ep) return;
 
     var img = document.getElementById('episode-cover');
@@ -291,12 +304,10 @@ __EPISODES_JS__
   function onReroll() {
     var idx = getRandomIdx();
     if (idx < 0) return;
-
-    var card = document.getElementById('card');
-    card.classList.add('fade-out');
+    cardEl.classList.add('fade-out');
     setTimeout(function() {
       displayEpisode(idx);
-      card.classList.remove('fade-out');
+      cardEl.classList.remove('fade-out');
     }, 200);
   }
 
@@ -311,28 +322,195 @@ __EPISODES_JS__
     img.alt = '封面加载失败';
   };
 
-  // Init
-  if (EPISODES.length === 0) {
+  // ---- Auto-update logic ----
+
+  function loadFromCache() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function saveToCache(episodes) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        episodes: episodes,
+        lastFetchTime: Date.now(),
+        embeddedCount: EMBEDDED_COUNT
+      }));
+    } catch (e) {
+      // localStorage full or unavailable — fall through
+    }
+  }
+
+  function mergeEpisodes(existing, fetched) {
+    // Merge by ep_id first, then deduplicate by title (keep higher ep_id)
+    var byEpId = {};
+    function add(eps) {
+      for (var i = 0; i < eps.length; i++) {
+        var ep = eps[i];
+        if (!byEpId[ep.ep_id]) {
+          byEpId[ep.ep_id] = ep;
+        }
+      }
+    }
+    add(existing);
+    add(fetched);
+
+    // Deduplicate by title number — B站 may return same episode with different ep_id
+    var byTitle = {};
+    var all = [];
+    for (var key in byEpId) {
+      if (byEpId.hasOwnProperty(key)) {
+        all.push(byEpId[key]);
+      }
+    }
+    for (var j = 0; j < all.length; j++) {
+      var e = all[j];
+      var t = e.title;
+      if (!byTitle[t] || e.ep_id > byTitle[t].ep_id) {
+        byTitle[t] = e;
+      }
+    }
+
+    var merged = [];
+    for (var tk in byTitle) {
+      if (byTitle.hasOwnProperty(tk)) {
+        merged.push(byTitle[tk]);
+      }
+    }
+    merged.sort(function(a, b) { return parseInt(a.title) - parseInt(b.title); });
+    return merged;
+  }
+
+  function fetchWithProxy(proxyUrl) {
+    return fetch(proxyUrl + encodeURIComponent(BILI_API))
+      .then(function(res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function(data) {
+        if (data.code !== 0) throw new Error('API code ' + data.code);
+        var eps = data.result.episodes;
+        return eps.map(function(ep) {
+          return {
+            ep_id: ep.id,
+            title: ep.title,
+            long_title: ep.long_title || '',
+            cover: ep.cover.replace('http://', 'https://'),
+            url: 'https://www.bilibili.com/bangumi/play/ep' + ep.id
+          };
+        });
+      });
+  }
+
+  function fetchFromBilibili() {
+    // Try proxies in sequence until one works
+    function tryNext(i) {
+      if (i >= CORS_PROXIES.length) {
+        return Promise.reject(new Error('All proxies failed'));
+      }
+      return fetchWithProxy(CORS_PROXIES[i]).catch(function() {
+        return tryNext(i + 1);
+      });
+    }
+    return tryNext(0);
+  }
+
+  function updateFooter(count, statusText) {
+    if (!footerEl) return;
+    var html = '数据来源 <a href="https://www.bilibili.com/bangumi/play/ss28747" target="_blank" rel="noopener">Bilibili</a>';
+    html += ' · 共 <strong>' + count + '</strong> 集';
+    if (statusText) html += ' · <span style="color:#09b389">' + statusText + '</span>';
+    footerEl.innerHTML = html;
+  }
+
+  function shouldCheckUpdate(cached) {
+    if (!cached) return true;
+    return (Date.now() - cached.lastFetchTime) > CHECK_INTERVAL;
+  }
+
+  function showEmptyState() {
     document.getElementById('episode-cover').classList.remove('loading');
     document.getElementById('episode-cover').style.display = 'none';
     document.getElementById('episode-title').textContent = '暂无剧集数据';
     document.getElementById('episode-link').removeAttribute('href');
     document.getElementById('episode-link-title').removeAttribute('href');
-    document.getElementById('reroll-btn').disabled = true;
+    rerollBtn.disabled = true;
+  }
+
+  function init() {
+    rerollBtn.addEventListener('click', onReroll);
+
+    var cached = loadFromCache();
+
+    // Use cache if still fresh
+    if (cached && cached.episodes && !shouldCheckUpdate(cached)) {
+      episodePool = cached.episodes;
+      updateFooter(episodePool.length, '已是最新');
+      displayEpisode(getRandomIdx());
+      return;
+    }
+
+    // Need to check for updates
+    var currentCount = (cached && cached.episodes) ? cached.episodes.length : EMBEDDED_COUNT;
+    updateFooter(currentCount, '检查更新中...');
+
+    fetchFromBilibili()
+      .then(function(fetched) {
+        var base = (cached && cached.episodes) ? cached.episodes : EPISODES;
+        var merged = mergeEpisodes(base, fetched);
+        var newCount = merged.length - base.length;
+
+        episodePool = merged;
+        saveToCache(merged);
+
+        if (newCount > 0) {
+          updateFooter(merged.length, '+' + newCount + ' 新剧集');
+        } else {
+          updateFooter(merged.length, '已是最新');
+        }
+
+        if (episodePool.length === 0) {
+          showEmptyState();
+        } else {
+          displayEpisode(getRandomIdx());
+        }
+      })
+      .catch(function(err) {
+        // Fetch failed — use cache or embedded fallback
+        console.warn('更新检查失败，使用本地数据: ' + err.message);
+        if (cached && cached.episodes) {
+          episodePool = cached.episodes;
+        }
+        saveToCache(episodePool); // bump lastFetchTime so we don't retry too often
+        updateFooter(episodePool.length, '使用本地数据');
+
+        if (episodePool.length === 0) {
+          showEmptyState();
+        } else {
+          displayEpisode(getRandomIdx());
+        }
+      });
+  }
+
+  if (EPISODES.length === 0) {
+    showEmptyState();
+    updateFooter(0, '无数据');
   } else {
-    document.getElementById('reroll-btn').addEventListener('click', onReroll);
-    displayEpisode(getRandomIdx());
+    init();
   }
 })();
 </script>
 </body>
 </html>'''
 
-# Replace placeholders
-html = html_template.replace('__EP_COUNT__', str(len(episodes)))
+html = html.replace('__EP_COUNT__', str(len(episodes)))
 html = html.replace('__EPISODES_JS__', episodes_js)
 
-# Write
 with open('D:/Code/daily-fan/index.html', 'w', encoding='utf-8') as f:
     f.write(html)
 
