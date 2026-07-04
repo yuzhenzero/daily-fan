@@ -18,6 +18,11 @@ for ep in episodes:
     )
 episodes_js = "const EPISODES = [\n" + ",\n".join(ep_js_lines) + "\n];"
 
+# Write separate episodes.js
+with open('D:/Code/daily-fan/episodes.js', 'w', encoding='utf-8') as f:
+    f.write(episodes_js + '\n')
+print(f'episodes.js written, {len(episodes)} episodes')
+
 html = r'''<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -246,9 +251,8 @@ html = r'''<!DOCTYPE html>
     </div>
   </noscript>
 
+  <script src="episodes.js"></script>
   <script>
-__EPISODES_JS__
-
 (function() {
   var currentIdx = -1;
 
@@ -329,7 +333,6 @@ __EPISODES_JS__
 </html>'''
 
 html = html.replace('__EP_COUNT__', str(len(episodes)))
-html = html.replace('__EPISODES_JS__', episodes_js)
 
 with open('D:/Code/daily-fan/index.html', 'w', encoding='utf-8') as f:
     f.write(html)
