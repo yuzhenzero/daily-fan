@@ -50,6 +50,7 @@ html = r'''<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="referrer" content="no-referrer">
+  <link rel="icon" type="image/webp" href="favicon.webp">
   <title>凡人修仙传 — 每日一集</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
