@@ -32,14 +32,34 @@ jobs:
           items={}
           for ep in eps:
               t=ep['title']
-              if t not in items or ep['id']>items[t]['ep_id']:
+              dur=ep.get('duration',0)
+              # Prefer full episodes (duration>0) over previews (duration=0).
+              # If both have duration>0, prefer the larger ep_id (newer version).
+              if t not in items:
                   items[t]={
                       'ep_id':ep['id'],
                       'title':ep['title'],
                       'long_title':ep.get('long_title',''),
                       'cover':ep['cover'].replace('http://','https://'),
-                      'url':'https://www.bilibili.com/bangumi/play/ep'+str(ep['id'])
+                      'url':'https://www.bilibili.com/bangumi/play/ep'+str(ep['id']),
+                      '_dur':dur
                   }
+              else:
+                  prev_dur=items[t].get('_dur',0)
+                  # Replace if: current is preview AND new is full episode
+                  # OR both are full AND new has larger ep_id
+                  if (prev_dur==0 and dur>0) or (prev_dur>0 and dur>0 and ep['id']>items[t]['ep_id']):
+                      items[t]={
+                          'ep_id':ep['id'],
+                          'title':ep['title'],
+                          'long_title':ep.get('long_title',''),
+                          'cover':ep['cover'].replace('http://','https://'),
+                          'url':'https://www.bilibili.com/bangumi/play/ep'+str(ep['id']),
+                          '_dur':dur
+                      }
+          # Remove internal _dur field before saving
+          for v in items.values():
+              v.pop('_dur',None)
           cleaned=sorted(items.values(),key=lambda e:int(e['title']))
           with open('episodes.json','w',encoding='utf-8') as f:
               json.dump(cleaned,f,ensure_ascii=False,indent=2)
