@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from datetime import datetime
 
 # Allow running from any directory
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -263,7 +264,7 @@ html = r'''<!DOCTYPE html>
     </main>
 
     <footer>
-      <p id="footer-status">数据来源 <a href="https://www.bilibili.com/bangumi/play/ss28747" target="_blank" rel="noopener">Bilibili</a> · 共 __EP_COUNT__ 集 · 更新于 2026-07-04</p>
+      <p id="footer-status">数据来源 <a href="https://www.bilibili.com/bangumi/play/ss28747" target="_blank" rel="noopener">Bilibili</a> · 共 __EP_COUNT__ 集 · 更新于 __UPDATE_DATE__</p>
     </footer>
   </div>
 
@@ -355,6 +356,7 @@ html = r'''<!DOCTYPE html>
 </html>'''
 
 html = html.replace('__EP_COUNT__', str(len(episodes)))
+html = html.replace('__UPDATE_DATE__', datetime.now().strftime('%Y-%m-%d'))
 
 try:
     with open('index.html', 'w', encoding='utf-8') as f:
