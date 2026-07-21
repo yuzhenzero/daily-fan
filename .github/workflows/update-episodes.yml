@@ -29,38 +29,25 @@ jobs:
           with open('season_data.json','r',encoding='utf-8') as f:
               d=json.load(f)
           eps=d['result']['episodes']
-          items={}
+          # Group by title, pick the one with longest duration.
+          # Previews are ~30s, full episodes ~1000s+.
+          groups={}
           for ep in eps:
               t=ep['title']
-              dur=ep.get('duration',0)
-              # Prefer full episodes (duration>0) over previews (duration=0).
-              # If both have duration>0, prefer the larger ep_id (newer version).
-              if t not in items:
-                  items[t]={
-                      'ep_id':ep['id'],
-                      'title':ep['title'],
-                      'long_title':ep.get('long_title',''),
-                      'cover':ep['cover'].replace('http://','https://'),
-                      'url':'https://www.bilibili.com/bangumi/play/ep'+str(ep['id']),
-                      '_dur':dur
-                  }
-              else:
-                  prev_dur=items[t].get('_dur',0)
-                  # Replace if: current is preview AND new is full episode
-                  # OR both are full AND new has larger ep_id
-                  if (prev_dur==0 and dur>0) or (prev_dur>0 and dur>0 and ep['id']>items[t]['ep_id']):
-                      items[t]={
-                          'ep_id':ep['id'],
-                          'title':ep['title'],
-                          'long_title':ep.get('long_title',''),
-                          'cover':ep['cover'].replace('http://','https://'),
-                          'url':'https://www.bilibili.com/bangumi/play/ep'+str(ep['id']),
-                          '_dur':dur
-                      }
-          # Remove internal _dur field before saving
-          for v in items.values():
-              v.pop('_dur',None)
-          cleaned=sorted(items.values(),key=lambda e:int(e['title']))
+              if t not in groups:
+                  groups[t]=[]
+              groups[t].append(ep)
+          cleaned=[]
+          for t in sorted(groups.keys(),key=int):
+              # Sort by (duration, ep_id) ascending; last = longest duration (or largest ep_id if tie)
+              best=sorted(groups[t],key=lambda e:(e.get('duration',0),e['id']))[-1]
+              cleaned.append({
+                  'ep_id':best['id'],
+                  'title':best['title'],
+                  'long_title':best.get('long_title',''),
+                  'cover':best['cover'].replace('http://','https://'),
+                  'url':'https://www.bilibili.com/bangumi/play/ep'+str(best['id'])
+              })
           with open('episodes.json','w',encoding='utf-8') as f:
               json.dump(cleaned,f,ensure_ascii=False,indent=2)
           print(f'{len(eps)} raw -> {len(cleaned)} unique')
