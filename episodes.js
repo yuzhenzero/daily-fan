@@ -187,5 +187,6 @@ const EPISODES = [
     {"ep_id":3854810,"title":"186","long_title":"慕兰之战10","cover":"https://i0.hdslb.com/bfs/archive/a708516d392f9b6cb2e6c7813988624c1ca6f507.jpg","url":"https://www.bilibili.com/bangumi/play/ep3854810"},
     {"ep_id":3854811,"title":"187","long_title":"慕兰之战11","cover":"https://i0.hdslb.com/bfs/archive/e6daf13f40b8168e445491355363206c0c227ca8.jpg","url":"https://www.bilibili.com/bangumi/play/ep3854811"},
     {"ep_id":3854812,"title":"188","long_title":"慕兰之战12","cover":"https://i0.hdslb.com/bfs/archive/8525304c37682ba1cf339b3c2ef7990bed4e411f.jpg","url":"https://www.bilibili.com/bangumi/play/ep3854812"},
-    {"ep_id":4292433,"title":"189","long_title":"慕兰之战13","cover":"https://i0.hdslb.com/bfs/archive/9c7ed6de4703ca80bbce3d5a25744277add3bd67.jpg","url":"https://www.bilibili.com/bangumi/play/ep4292433"}
+    {"ep_id":3854813,"title":"189","long_title":"慕兰之战13","cover":"https://i0.hdslb.com/bfs/archive/145532e73969446311d96225f2862f7e4f95852b.jpg","url":"https://www.bilibili.com/bangumi/play/ep3854813"},
+    {"ep_id":4292434,"title":"190","long_title":"慕兰之战14","cover":"https://i0.hdslb.com/bfs/archive/669d76a2dad4dc86bbb94d0e70466bb349528a0b.jpg","url":"https://www.bilibili.com/bangumi/play/ep4292434"}
 ];
