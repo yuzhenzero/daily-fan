@@ -1358,10 +1358,17 @@
     "url": "https://www.bilibili.com/bangumi/play/ep3854818"
   },
   {
-    "ep_id": 4292439,
+    "ep_id": 3854819,
     "title": "195",
     "long_title": "慕兰之战19",
-    "cover": "https://i0.hdslb.com/bfs/archive/1485c2969d2975b5cb66ff61d5d0c5393033ea59.jpg",
-    "url": "https://www.bilibili.com/bangumi/play/ep4292439"
+    "cover": "https://i0.hdslb.com/bfs/archive/3739283d287aed618d36b45b1b17387976a58280.jpg",
+    "url": "https://www.bilibili.com/bangumi/play/ep3854819"
+  },
+  {
+    "ep_id": 4292440,
+    "title": "196",
+    "long_title": "慕兰之战20",
+    "cover": "https://i0.hdslb.com/bfs/archive/feebd4631fc78244189d35505e98e0680f20dc32.jpg",
+    "url": "https://www.bilibili.com/bangumi/play/ep4292440"
   }
 ]
